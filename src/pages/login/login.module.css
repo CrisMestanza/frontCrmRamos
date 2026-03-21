@@ -1,0 +1,681 @@
+/* ============================================================
+   login.module.css — NexusCRM Login Page
+   ============================================================ */
+
+/* Google Font import — add to your index.html or _app if needed */
+/* @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&display=swap'); */
+/* @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap'); */
+
+/* ── Variables ────────────────────────────────────────────── */
+.wrapper {
+  --primary: #ec5b13;
+  --bg-dark: #0a0a0a;
+  --surface: #171717;
+  --accent-purple: #8b5cf6;
+  --accent-blue: #0ea5e9;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --text-muted: #94a3b8;
+
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Left Panel ───────────────────────────────────────────── */
+.formPanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background-color: var(--bg-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 10;
+}
+
+@media (min-width: 1024px) {
+  .formPanel {
+    width: 40%;
+    padding: 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .formPanel {
+    padding: 6rem;
+  }
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.logoIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background-color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.materialIcon {
+  font-size: 1.5rem;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  color: white;
+  margin: 0;
+}
+
+.logoAccent {
+  color: var(--primary);
+}
+
+/* Form body */
+.formBody {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 28rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.formHeading {
+  margin-bottom: 2.5rem;
+}
+
+.formTitle {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 0.75rem;
+}
+
+.formSubtitle {
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-left: 0.25rem;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 0.25rem;
+}
+
+.forgotLink {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem ;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(236, 91, 19, 0.15);
+}
+
+.inputPassword {
+  padding-right: 3rem;
+}
+
+.visibilityBtn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.visibilityBtn:hover {
+  color: var(--primary);
+}
+
+/* Checkbox */
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.25rem;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Submit */
+.submitBtn {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 20px rgba(236, 91, 19, 0.25);
+}
+
+.submitBtn:hover {
+  background-color: rgba(236, 91, 19, 0.9);
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.dividerLine {
+  height: 1px;
+  flex-grow: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dividerText {
+  white-space: nowrap;
+}
+
+/* SSO */
+.ssoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.ssoBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: inherit;
+}
+
+.ssoBtn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.ssoLogo {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.ssoTerminalIcon {
+  font-size: 1.25rem;
+  color: white;
+}
+
+.ssoBtnText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  padding-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.footerLink {
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.footerLink:hover {
+  color: var(--primary);
+}
+
+/* ── Right Panel ──────────────────────────────────────────── */
+.visualPanel {
+  display: none;
+  flex: 1;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 3rem;
+
+  background-color: #0a0a0a;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
+}
+
+@media (min-width: 1024px) {
+  .visualPanel {
+    display: flex;
+  }
+}
+
+/* Glass utility */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Ambient glows */
+.glow {
+  position: absolute;
+  width: 24rem;
+  height: 24rem;
+  border-radius: 9999px;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.glowPurple {
+  top: 25%;
+  left: 25%;
+  background-color: rgba(139, 92, 246, 0.2);
+}
+
+.glowBlue {
+  bottom: 25%;
+  right: 25%;
+  background-color: rgba(14, 165, 233, 0.2);
+}
+
+/* Dashboard card */
+.dashboardCard {
+  position: relative;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 56rem;
+  aspect-ratio: 16 / 10;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Mock header */
+.mockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+.trafficLights {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+}
+
+.dotRed   { background-color: rgba(239, 68, 68, 0.5); }
+.dotYellow { background-color: rgba(234, 179, 8, 0.5); }
+.dotGreen  { background-color: rgba(34, 197, 94, 0.5); }
+
+.mockSearchBar {
+  height: 1.5rem;
+  width: 33%;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+}
+
+.mockAvatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mock body */
+.mockBody {
+  flex: 1;
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* Sidebar */
+.mockSidebar {
+  width: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sidebarIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebarIconActive {
+  background-color: rgba(236, 91, 19, 0.2);
+  color: var(--primary);
+}
+
+.sidebarIconInactive {
+  color: #64748b;
+}
+
+/* Main content */
+.mockMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Metrics */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.metricCard {
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metricLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.metricValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* Chart */
+.chartArea {
+  flex: 1;
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.25rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chartTitlePlaceholder {
+  height: 0.75rem;
+  width: 8rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.25rem;
+}
+
+.chartFilterPlaceholder {
+  height: 0.75rem;
+  width: 4rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.25rem;
+}
+
+.bars {
+  position: absolute;
+  bottom: 2rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 7rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+}
+
+.barBlue      { background-color: rgba(14, 165, 233, 0.4); }
+.barBlueBright { background-color: rgba(14, 165, 233, 0.6); }
+.barPrimary   { background-color: var(--primary); }
+.barPurple    { background-color: rgba(139, 92, 246, 0.5); }
+
+/* Floating cards */
+.floatingCardTopRight,
+.floatingCardBottomLeft {
+  position: absolute;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.floatingCardTopRight {
+  top: 5rem;
+  right: 5rem;
+  transform: translateX(3rem) rotate(-3deg);
+}
+
+.floatingCardBottomLeft {
+  bottom: 10rem;
+  left: 2.5rem;
+  transform: translateX(-2rem) rotate(3deg);
+}
+
+.floatingCardIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floatingCardLabel {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.floatingCardValue {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: white;
+}
+
+/* Radial progress */
+.radialProgress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.25);
+  width: 12rem;
+  height: 12rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+}
+
+.radialSvg {
+  width: 10rem;
+  height: 10rem;
+  transform: rotate(-90deg);
+}
+
+.radialTrack {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 8;
+}
+
+.radialFill {
+  fill: transparent;
+  stroke: var(--primary);
+  stroke-width: 8;
+  stroke-dasharray: 440;
+  stroke-dashoffset: 110;
+}
+
+.radialCenter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.radialPercent {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+}
+
+.radialLabel {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}

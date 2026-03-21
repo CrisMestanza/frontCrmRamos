@@ -1,0 +1,143 @@
+/* ventas.module.css */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
+
+.main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.pageSubtitle {
+  color: #a0a0a0;
+  margin: 0.5rem 0 0;
+}
+
+/* Dashboard de Métricas */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, min-minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.metricCard {
+  background: #141414;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #222;
+  position: relative;
+  overflow: hidden;
+}
+
+.metricTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.metricLabel {
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.metricValue {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.metricBadge {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Tabla */
+.tableCard {
+  background: #141414;
+  border-radius: 12px;
+  border: 1px solid #222;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableHead {
+  background: #1a1a1a;
+  color: #888;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.th {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+}
+
+.tableRow {
+  border-bottom: 1px solid #222;
+  transition: background 0.2s;
+}
+
+.tableRow:hover {
+  background: #1a1a1a;
+}
+
+.td {
+  padding: 1.2rem 1.5rem;
+  vertical-align: middle;
+}
+
+.priceTag {
+  color: #10b981;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.projectBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #0a0a0a;
+  color: #10b981;
+}
