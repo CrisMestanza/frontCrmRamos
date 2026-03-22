@@ -1,0 +1,36 @@
+name: 🚀 Deploy Vite to cPanel (FTP)
+
+on:
+  push:
+    branches:
+      - main # o master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🟢 Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Instalar dependencias
+        run: npm install
+
+      - name: 🏗️ Build (Vite)
+        run: npm run build
+
+      - name: 🚀 Deploy por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          local-dir: dist/
+          server-dir: public_html/
+          dangerous-clean-slate: true
