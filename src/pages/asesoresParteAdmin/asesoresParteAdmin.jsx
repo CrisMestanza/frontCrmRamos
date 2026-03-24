@@ -20,7 +20,7 @@ const AsesoresParteAdmin = () => {
   useEffect(() => {
     const obtenerAsesores = async () => {
       try {
-        const response = await axios.get("http://192.168.100.32:8000/api/getasesores/");
+        const response = await axios.get("https://api.ramosgrupo.lat/api/getasesores/");
         setDataAsesores(response.data);
       } catch (error) {
         console.error("Error al obtener asesores:", error);

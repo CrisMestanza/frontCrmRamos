@@ -72,7 +72,7 @@ const LeadsPage = () => {
     const obtenerAsesores = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.100.32:8000/api/getasesores/"
+          "https://api.ramosgrupo.lat/api/getasesores/"
         );
         console.log(response.data)
         setDataAsesores(response.data);
@@ -93,7 +93,7 @@ const LeadsPage = () => {
     const obtenerLeads = async () => {
       const idUsuario = sessionStorage.getItem("id_usuario");
       try {
-        const response = await axios.get(`http://192.168.100.32:8000/api/getleads/${idUsuario}/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
         console.log(response.data)
         setDataLeads(response.data);
 
@@ -110,7 +110,7 @@ const LeadsPage = () => {
   useEffect(() => {
     const obtenerTotalVendidos = async () => {
       try {
-        const response = await axios.get("http://192.168.100.32:8000/api/totalleadsVendidos/");
+        const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsVendidos/");
         // IMPORTANTE: Usamos .total_vendidos porque así lo envía tu backend
         setTotalVendidos(response.data.total_vendidos || 0);
       } catch (error) {
@@ -125,7 +125,7 @@ const LeadsPage = () => {
   useEffect(() => {
     const obtenerTotalLeadsGenerales = async () => {
       try {
-        const response = await axios.get("http://192.168.100.32:8000/api/totalleadsgeneral/");
+        const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsgeneral/");
         // IMPORTANTE: Usamos .total_vendidos porque así lo envía tu backend
         setTotalLeadsGenerales(response.data.total || 0);
       } catch (error) {
@@ -141,7 +141,7 @@ const LeadsPage = () => {
     const totalLeads = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.100.32:8000/api/totalleads/"
+          "https://api.ramosgrupo.lat/api/totalleads/"
         );
 
         setTotalLeads(response.data.total);
@@ -160,7 +160,7 @@ const LeadsPage = () => {
     const totalLeadsHoy = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.100.32:8000/api/totalleadshoy/"
+          "https://api.ramosgrupo.lat/api/totalleadshoy/"
         );
 
         setTotalLeadsHoy(response.data.total);
@@ -186,7 +186,7 @@ const LeadsPage = () => {
   const cambiarAsesor = async (lead, id_usuario) => {
     try {
       const idFinal = id_usuario === "" ? null : id_usuario;
-      await axios.patch(`http://192.168.100.32:8000/api/updatelead/${lead.id_lead}/`, {
+      await axios.patch(`https://api.ramosgrupo.lat/api/updatelead/${lead.id_lead}/`, {
         id_asesor: idFinal
       });
 

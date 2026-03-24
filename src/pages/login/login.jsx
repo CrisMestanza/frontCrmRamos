@@ -15,7 +15,7 @@ const Login = () => {
     
     try {
       const response = await axios.post(
-        "http://192.168.100.32:8000/api/login/",
+        "https://api.ramosgrupo.lat/api/login/",
         {
           email: email,
           password: password

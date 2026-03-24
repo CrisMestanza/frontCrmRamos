@@ -20,7 +20,7 @@ const InteraccionesAsesor = () => {
     useEffect(() => {
         const fetchInteracciones = async () => {
             try {
-                const res = await axios.get(`http://192.168.100.32:8000/api/getiteraciones/${idAsesor}/${idLead}/`);
+                const res = await axios.get(`https://api.ramosgrupo.lat/api/getiteraciones/${idAsesor}/${idLead}/`);
                 setInteracciones(res.data);
                 setFiltered(res.data);
             } catch (error) {

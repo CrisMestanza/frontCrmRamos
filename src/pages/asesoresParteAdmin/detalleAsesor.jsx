@@ -22,12 +22,12 @@ const DetalleAsesor = () => {
     const fetchData = async () => {
       try {
         // 1. Obtener info del asesor
-        const resAsesores = await axios.get(`http://192.168.100.32:8000/api/getasesores/`);
+        const resAsesores = await axios.get(`https://api.ramosgrupo.lat/api/getasesores/`);
         const encontrado = resAsesores.data.find(u => u.id_usuario === parseInt(id));
         setAsesor(encontrado);
 
         // 2. Obtener Leads del asesor específico usando tu nueva ruta
-        const resLeads = await axios.get(`http://192.168.100.32:8000/api/getleads/${id}/`);
+        const resLeads = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${id}/`);
         setLeadsAsesor(resLeads.data);
       } catch (error) {
         console.error("Error cargando datos:", error);
