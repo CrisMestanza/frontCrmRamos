@@ -3,6 +3,8 @@ import styles from './leads.module.css';
 import Aside from '../../templates/aside';
 import axios from "axios";
 import AsignarAsesorModal from './modalAsignar'; // Importa el nuevo archivo
+import ModalLead from './modalAgregarLead';
+
 import {
   MdMoreVert, MdSearch, MdFilterList, MdChevronLeft,
   MdChevronRight,
@@ -10,7 +12,8 @@ import {
   MdBadge,
   MdGroups,
   MdBarChart,
-  MdHub
+  MdHub,
+  MdPersonAdd
 } from "react-icons/md";
 
 const leads = [
@@ -64,8 +67,10 @@ const metrics = [
   { label: 'Leads Hoy', value: '+42', badge: '+15%', progress: 90 },
 ];
 
-const LeadsPage = () => {
 
+const LeadsPage = () => {
+  
+  const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
   // Obtener datos de los asesores
   const [dataAsesores, setDataAsesores] = useState([]);
   useEffect(() => {
@@ -85,6 +90,10 @@ const LeadsPage = () => {
     obtenerAsesores();
   }, []);
 
+  const handleLeadAdded = () => {
+    // Aquí llamas a tu función obtenerLeads() para refrescar la tabla
+    console.log("Nuevo lead agregado, refrescando tabla...");
+  };
   // Para obtener los leads
 
   const [dataLeads, setDataLeads] = useState([]);
@@ -178,10 +187,14 @@ const LeadsPage = () => {
   const [tempAsesorId, setTempAsesorId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null)
+  
+  const [isModalOpenAsignar, setIsModalOpenAsignar] = useState(false);
+
+
   const handleSelectChange = (lead, id_usuario) => {
     setSelectedLead(lead);      // Guardamos el lead actual
     setTempAsesorId(id_usuario); // Guardamos el ID del asesor seleccionado en el select
-    setIsModalOpen(true);        // Abrimos el modal
+    setIsModalOpenAsignar(true);       // Abrimos el modal
   };
   const cambiarAsesor = async (lead, id_usuario) => {
     try {
@@ -190,7 +203,7 @@ const LeadsPage = () => {
         id_asesor: idFinal
       });
 
-      setIsModalOpen(false); // Cerramos el modal
+      setIsModalOpenAsignar(false); // Cerramos el modal
       alert(`Asesor asignado correctamente`);
 
       // Aquí podrías volver a llamar a obtenerLeads() para refrescar la tabla
@@ -300,7 +313,13 @@ const LeadsPage = () => {
           </div>
 
         </div>
-
+        <button
+          className={styles.btnPrimary}
+          onClick={() => setIsModalOpen(true)}
+        >
+          <MdPersonAdd className={styles.icon} />
+          <span>Agregar Lead</span>
+        </button>
         {/* Tabs */}
         <div className={styles.tabs}>
           {tabs.map((tab, i) => (
@@ -418,8 +437,8 @@ const LeadsPage = () => {
           {/* ... dentro de LeadsPage.js ... */}
           {selectedLead && (
             <AsignarAsesorModal
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+             isOpen={isModalOpenAsignar}
+             onClose={() => setIsModalOpenAsignar(false)}
               lead={selectedLead}
               asesores={dataAsesores}
               tempAsesorId={tempAsesorId} // <--- AÑADE ESTA LÍNEA
@@ -442,6 +461,59 @@ const LeadsPage = () => {
           </div>
         </div>
       </main>
+
+      <ModalLead
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onLeadAdded={handleLeadAdded}
+      />
+      {/*  Modal de ventas */}
+
+      {isVentaModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Registrar Venta</h3>
+            <p>Ingresa los detalles finales de la transacción:</p>
+
+            <div className={styles.formGroup}>
+              <label>Precio de Venta (S/.)</label>
+              <input
+                type="number"
+                className={styles.inputTable}
+                value={datosVenta.monto}
+                onChange={(e) => setDatosVenta({ ...datosVenta, monto: e.target.value })}
+                placeholder="Ej: 150000"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Descripción / Notas</label>
+              <textarea
+                className={styles.inputTable}
+                style={{ minHeight: '80px', paddingTop: '10px' }}
+                value={datosVenta.descripcion}
+                onChange={(e) => setDatosVenta({ ...datosVenta, descripcion: e.target.value })}
+              />
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setIsVentaModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.btnPrimary}
+                onClick={confirmarVenta}
+                disabled={!datosVenta.monto}
+              >
+                Confirmar Venta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

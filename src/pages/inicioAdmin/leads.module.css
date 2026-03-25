@@ -718,3 +718,40 @@
 .pageBtn:not(:disabled):hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
+
+.icon {
+  font-size: 1.2rem;
+  /* Asegura que el icono de react-icons se alinee bien */
+  display: flex;
+  align-items: center;
+}
+
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: var(--primary); /* Usando tu variable naranja */
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(236, 91, 19, 0.2);
+  margin-bottom: 1.5rem; /* Espacio con la tabla/tabs */
+}
+
+.btnPrimary:hover {
+  background-color: #ff6b1a; /* Un naranja un poco más vibrante */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(236, 91, 19, 0.3);
+}
+
+.btnPrimary:active {
+  transform: translateY(0);
+}
