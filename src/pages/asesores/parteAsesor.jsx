@@ -26,10 +26,11 @@ const metrics = [
 ];
 
 const ParteAsesor = () => {
-// Nuevo estado para controlar el modal de duración de llamada
-const [showCallModal, setShowCallModal] = useState(false);
-const [callLeadId, setCallLeadId] = useState(null);
-const [callDuration, setCallDuration] = useState("");
+  // Nuevo estado para controlar el modal de duración de llamada
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [callLeadId, setCallLeadId] = useState(null);
+  const [callDurationMinutos, setCallDurationMinutos] = useState("");
+  const [callDuration, setCallDuration] = useState("");
   // Modal agregar lead
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -284,50 +285,55 @@ const [callDuration, setCallDuration] = useState("");
 
 
   // Enviar tipo iteracion
-// Enviar tipo iteracion
- const enviarTipoIteracion = async (tipo, id_lead) => {
-  const idUsuario = sessionStorage.getItem("id_usuario");
 
-  if (tipo === 1) { // WhatsApp
-    try {
-      await axios.post("https://api.ramosgrupo.lat/api/saveiteracion/", {
-        id_lead: id_lead,
-        id_usuario: idUsuario,
-        id_tipo_interaccion: 1,
-        duracion_segundos: null,
-        fecha: new Date().toISOString()
-      });
-    } catch (error) { console.log(error); }
-  } 
-  
-  if (tipo === 2) { // Llamada
-    // 1. Guardamos el ID para saber a quién estamos llamando
-    setCallLeadId(id_lead);
-    // 2. Abrimos nuestro modal de React (que sobrevive al cambio de app)
-    setShowCallModal(true);
-    // 3. El navegador lanzará la app de teléfono automáticamente por el href del <a>
-  }
-};
+  const enviarTipoIteracion = async (tipo, id_lead) => {
+    const idUsuario = sessionStorage.getItem("id_usuario");
 
-const finalizarRegistroLlamada = async () => {
+    if (tipo === 1) { // WhatsApp
+      try {
+        await axios.post("https://api.ramosgrupo.lat/api/saveiteracion/", {
+          id_lead: id_lead,
+          id_usuario: idUsuario,
+          id_tipo_interaccion: 1,
+          duracion_segundos: null,
+          duracion_minutos: null,
+          fecha: new Date().toISOString()
+        });
+      } catch (error) { console.log(error); }
+    }
+
+    if (tipo === 2) { // Llamada
+      // 1. Guardamos el ID para saber a quién estamos llamando
+      setCallLeadId(id_lead);
+      // 2. Abrimos nuestro modal de React (que sobrevive al cambio de app)
+      setShowCallModal(true);
+      // 3. El navegador lanzará la app de teléfono automáticamente por el href del <a>
+    }
+  };
+
+ const finalizarRegistroLlamada = async () => {
   const idUsuario = sessionStorage.getItem("id_usuario");
   try {
     await axios.post("https://api.ramosgrupo.lat/api/saveiteracion/", {
       id_lead: callLeadId,
       id_usuario: idUsuario,
       id_tipo_interaccion: 2,
-      duracion_segundos: callDuration,
+      // Convertimos a número o enviamos 0 si está vacío
+      duracion_segundos: Number(callDuration) || 0,
+      duracion_minutos: Number(callDurationMinutos) || 0,
       fecha: new Date().toISOString()
     });
-    // Limpiar y cerrar
+
     setShowCallModal(false);
     setCallDuration("");
+    setCallDurationMinutos("");
     setCallLeadId(null);
-    alert("Llamada registrada");
+    alert("Llamada registrada con éxito");
   } catch (error) {
-    console.error("Error al guardar:", error);
+    console.error("Error al guardar la interacción:", error);
+    alert("No se pudo guardar el registro.");
   }
-};
+}
 
 
   const [activeTab, setActiveTab] = useState(0);
@@ -686,41 +692,55 @@ const finalizarRegistroLlamada = async () => {
 
 
       {showCallModal && (
-  <div className={styles.modalOverlay}>
-    <div className={styles.modalContent}>
-      <h3>📞 Llamada en curso...</h3>
-      <p>Cuando termines la llamada, ingresa la duración:</p>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>📞 Llamada en curso...</h3>
+            <p>Cuando termines la llamada, ingresa la duración:</p>
 
-      <div className={styles.formGroup}>
-        <label>Duración (segundos)</label>
-        <input
-          type="number"
-          className={styles.inputTable}
-          value={callDuration}
-          onChange={(e) => setCallDuration(e.target.value)}
-          placeholder="Ej: 45"
-          autoFocus
-        />
-      </div>
+            <div className={styles.formGroup}>
+              <label>Duración (Minutos)</label>
+              <input
+                type="number"
+                className={styles.inputTable}
+                value={callDurationMinutos}
+                onChange={(e) => setCallDurationMinutos(e.target.value)}
+                placeholder="Ej: 20"
+                autoFocus
+              />
+            </div>
 
-      <div className={styles.modalActions}>
-        <button 
-          className={styles.btnSecondary} 
-          onClick={() => setShowCallModal(false)}
-        >
-          Cancelar
-        </button>
-        <button 
-          className={styles.btnPrimary} 
-          onClick={finalizarRegistroLlamada}
-          disabled={!callDuration}
-        >
-          Guardar Registro
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className={styles.formGroup}>
+              <label>Duración (segundos)</label>
+              <input
+                type="number"
+                className={styles.inputTable}
+                value={callDuration}
+                onChange={(e) => setCallDuration(e.target.value)}
+                placeholder="Ej: 5"
+                autoFocus
+              />
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setShowCallModal(false)}
+              >
+                Cancelar
+              </button>
+        
+              <button
+                className={styles.btnPrimary}
+                onClick={finalizarRegistroLlamada}
+                // Se habilita si hay minutos O segundos
+                disabled={!callDuration && !callDurationMinutos}
+              >
+                Guardar Registro
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { MdChevronLeft, MdEmail, MdPhone, MdBadge, MdPerson, MdTrendingUp, MdHis
 import axios from 'axios';
 import Aside from '../../templates/aside';
 import styles from './asesoresParteAdmin.module.css';
+import * as XLSX from 'xlsx';
 
 const DetalleAsesor = () => {
   const { id } = useParams();
@@ -17,6 +18,7 @@ const DetalleAsesor = () => {
   // Estado para la pestaña activa (Filtro por id_estado)
   // Por defecto 5 (Estado "Nuevo" según tu imagen)
   const [activeEstado, setActiveEstado] = useState(5);
+  const idUsuario = sessionStorage.getItem("id_usuario");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +53,31 @@ const DetalleAsesor = () => {
   // Filtrar leads según la pestaña seleccionada
   const leadsFiltrados = leadsAsesor.filter(lead => lead.id_estado?.id_estado === activeEstado);
 
+  const handleDownloadExcel = async () => {
+    try {
+      // Usamos el 'id' de la URL que es el del asesor que estamos viendo
+      const res = await axios.get(`https://api.ramosgrupo.lat/api/getexcel/${id}/`);
+      const data = res.data;
+
+      if (data.length === 0) {
+        alert("No hay datos para exportar");
+        return;
+      }
+
+      // Creamos el libro de trabajo (Workbook)
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+
+      // Generamos el archivo y disparamos la descarga
+      XLSX.writeFile(workbook, `Reporte_Leads_${asesor.nombre}.xlsx`);
+
+    } catch (error) {
+      console.error("Error al descargar Excel:", error);
+      alert("Hubo un error al generar el archivo");
+    }
+  };
+
   if (loading) return <div className={styles.wrapper}>Cargando...</div>;
   if (!asesor) return <div className={styles.wrapper}>Asesor no encontrado</div>;
 
@@ -77,6 +104,13 @@ const DetalleAsesor = () => {
             <p><MdBadge color="var(--primary)" /> Rol: {asesor.rol}</p>
           </div>
         </div>
+
+        <button
+          className={styles.btnPrimary}
+          onClick={handleDownloadExcel}
+        >
+          <span>Descargar Excel</span>
+        </button>
 
         {/* SISTEMA DE TABS (ESTADOS) */}
         <div className={styles.tabs}>
