@@ -8,11 +8,11 @@ const Login = () => {
   const navigate = useNavigate()
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
   const enviarDatos = async (e) => {
     // Evita que la página se recargue al presionar Enter o el botón
     if (e) e.preventDefault();
-    
+
     try {
       const response = await axios.post(
         "https://api.ramosgrupo.lat/api/login/",
@@ -92,13 +92,15 @@ const Login = () => {
               <div className={styles.inputWrapper}>
                 <input
                   className={`${styles.input} ${styles.inputPassword}`}
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={actualzarPassword}
                 />
-                <button className={styles.visibilityBtn} type="button">
-                  <span className="material-symbols-outlined">visibility</span>
+                <button className={styles.visibilityBtn} type="button" onClick={() => setShowPassword(!showPassword)}>
+                  <span className="material-symbols-outlined">
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
                 </button>
               </div>
             </div>
@@ -202,8 +204,8 @@ const Login = () => {
                     <div
                       key={i}
                       className={`${styles.bar} ${i === 6 ? styles.barPrimary :
-                          i === 7 || i === 8 ? styles.barPurple :
-                            i === 3 ? styles.barBlueBright : styles.barBlue
+                        i === 7 || i === 8 ? styles.barPurple :
+                          i === 3 ? styles.barBlueBright : styles.barBlue
                         }`}
                       style={{ height: `${h}%` }}
                     />

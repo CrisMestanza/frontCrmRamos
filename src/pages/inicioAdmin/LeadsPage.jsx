@@ -342,6 +342,7 @@ const LeadsPage = () => {
                   <th className={styles.th}>Nombre</th>
                   <th className={styles.th}>Fuente</th>
                   <th className={styles.th}>Proyecto</th>
+                  <th className={styles.th}>Observaciones</th>
                   <th className={styles.th}>Estado / Sub-estado</th>
                   <th className={`${styles.th} ${styles.thHideSmall}`}>Asignado</th>
                   <th className={`${styles.th} ${styles.thHideMedium}`}>Fecha</th>
@@ -384,6 +385,11 @@ const LeadsPage = () => {
                       <td className={styles.td}>
                         <p className={styles.tdMuted} style={{ fontSize: '13px' }}>
                           {lead.id_proyecto_interes?.nombre_proyecto}
+                        </p>
+                      </td>
+                      <td className={styles.td}>
+                        <p className={styles.tdMuted} style={{ fontSize: '13px' }}>
+                          {lead.observacion}
                         </p>
                       </td>
 
