@@ -1,21 +1,38 @@
-import { useLocation, Link } from 'react-router-dom'; // Importa Link y useLocation
+import React, { useState } from 'react'; 
+import { useLocation, Link } from 'react-router-dom';
 import styles from "./aside.module.css";
-import { MdGroup, MdBadge, MdGroups, MdBarChart, MdHub } from "react-icons/md";
+import { MdGroup, MdBadge, MdGroups, MdHub, MdLogout } from "react-icons/md"; 
 
 const Aside = ({ sidebarOpen, setSidebarOpen }) => {
+  // Estado para la confirmación de salida
+  const [confirmando, setConfirmando] = useState(false);
+  
   const rol = sessionStorage.getItem("rol");
   const nombre = sessionStorage.getItem("nombre");
-  
-  // Hook para obtener la ruta actual (ej: '/asesoresadmin')
   const location = useLocation();
 
+  const handleLogout = () => {
+    if (!confirmando) {
+      setConfirmando(true);
+      // Regresa al estado inicial si no confirma en 3 segundos
+      setTimeout(() => setConfirmando(false), 3000);
+    } else {
+      // LIMPIEZA TOTAL: Borra sesión y almacenamiento local para evitar bloqueos
+      sessionStorage.clear();
+      localStorage.clear();
+      
+      // REDIRECCIÓN FORZADA: Usa replace para que no pueda volver atrás con el navegador
+      window.location.replace("/"); 
+    }
+  };
+
+  // Menús según el rol detectado
   const menusPorRol = {
     ADMIN: [
       { icon: <MdGroup />, label: 'Leads', url: '/inicio' },
       { icon: <MdBadge />, label: 'Asesores', url: '/asesoresadmin' },
-      
       { icon: <MdGroups />, label: 'Clientes', url: '/ventasadmin' },
-      // { icon: <MdBarChart />, label: 'Estadística', url: '/stats' },
+      { icon: <MdGroups />, label: 'Gestion Asesor', url: '/gestionasesor' },
     ],
     ASESOR: [
       { icon: <MdBadge />, label: 'Mi panel', url: '/asesores' },
@@ -28,24 +45,20 @@ const Aside = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.sidebarInner}>
-        {/* Logo */}
+        
+        {/* Cabecera de NexusCRM */}
         <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>
-            <MdHub size="1.5em" color="#ffffff" />
-          </div>
+          <div className={styles.logoIcon}><MdHub size="1.5em" color="#ffffff" /></div>
           <div>
             <h1 className={styles.logoTitle}>NexusCRM</h1>
             <p className={styles.logoSub}>Panel de Control</p>
           </div>
         </div>
 
-        {/* Nav - Renderizado dinámico con detección de ruta */}
+        {/* Navegación Principal */}
         <nav className={styles.nav}>
           {menuItems.map((item) => {
-            // LÓGICA DE ACTIVACIÓN:
-            // Si la ruta actual coincide con la url del item, aplicamos la clase active
             const isActive = location.pathname === item.url;
-
             return (
               <Link
                 key={item.label}
@@ -57,6 +70,36 @@ const Aside = ({ sidebarOpen, setSidebarOpen }) => {
               </Link>
             );
           })}
+
+          {/* Botón de Cierre de Sesión con Doble Confirmación */}
+          <button 
+            onClick={handleLogout}
+            className={styles.navItem} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              width: '100%', 
+              cursor: 'pointer', 
+              textAlign: 'left',
+              marginTop: '10px'
+            }}
+          >
+            <span 
+              className={styles.iconWrapper} 
+              style={{ color: confirmando ? '#ffeb3b' : '#ff4d4d' }}
+            >
+              <MdLogout />
+            </span>
+            <span 
+              className={styles.navLabel} 
+              style={{ 
+                color: confirmando ? '#ffeb3b' : '#ff4d4d', 
+                fontWeight: confirmando ? '700' : 'normal' 
+              }}
+            >
+              {confirmando ? "¿Deseas cerrar sesión?" : "Cerrar Sesión"}
+            </span>
+          </button>
         </nav>
 
         {/* Información del Usuario */}

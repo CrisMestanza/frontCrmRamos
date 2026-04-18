@@ -8,6 +8,7 @@ import DetalleAsesor from "./pages/asesoresParteAdmin/detalleAsesor";
 import HistorialLead from "./pages/asesoresParteAdmin/historialLeadEstado";
 import InteraccionesAsesor from "./pages/asesoresParteAdmin/InteraccionesAsesor";
 import VentasPageAdmin from "./pages/ventas/VentasPage";
+import GestionAsesor from "./pages/gestionAsesor/asesorGestion"
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/inicio" element={<LeadsPage />} />
         <Route path="/asesores" element={<ParteAsesor />} />
+        <Route path="/gestionasesor" element={<GestionAsesor />} />
         <Route path="/ventasadmin" element={<VentasPageAdmin />} />
         <Route path="/asesoresadmin" element={<ParteAsesorAdmin />} />
         <Route path="/asesoresadmin/detalle/:id" element={<DetalleAsesor />} />

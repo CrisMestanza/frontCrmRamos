@@ -1,5 +1,6 @@
 import styles from './login.module.css';
 import { MdRocketLaunch, MdTrendingUp, MdPersonAdd } from "react-icons/md";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -97,10 +98,13 @@ const Login = () => {
                   value={password}
                   onChange={actualzarPassword}
                 />
-                <button className={styles.visibilityBtn} type="button" onClick={() => setShowPassword(!showPassword)}>
-                  <span className="material-symbols-outlined">
-                    {showPassword ? "visibility_off" : "visibility"}
-                  </span>
+                <button
+                  className={styles.visibilityBtn}
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
               </div>
             </div>

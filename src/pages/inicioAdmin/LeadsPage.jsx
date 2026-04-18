@@ -344,7 +344,7 @@ const LeadsPage = () => {
                   <th className={styles.th}>Proyecto</th>
                   <th className={styles.th}>Observaciones</th>
                   <th className={styles.th}>Estado / Sub-estado</th>
-                  <th className={`${styles.th} ${styles.thHideSmall}`}>Asignado</th>
+                  <th className={`${styles.th}`}>Asignado</th>
                   <th className={`${styles.th} ${styles.thHideMedium}`}>Fecha</th>
                   <th className={`${styles.th} ${styles.thRight}`}>Acciones</th>
                 </tr>
@@ -404,7 +404,7 @@ const LeadsPage = () => {
                       </td>
 
                       {/* Asignado (Selector) */}
-                      <td className={`${styles.td} ${styles.tdHideSmall}`}>
+                      <td className={`${styles.td}`}>
                         <select
                           className={styles.select}
                           value={lead.id_asesor?.id_usuario || ""}
