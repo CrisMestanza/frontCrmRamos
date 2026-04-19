@@ -328,6 +328,13 @@
     background: rgba(255, 255, 255, 0.015);
 }
 
+.tableMessage {
+    padding: 28px 16px;
+    text-align: center;
+    color: #8d8d8d;
+    font-size: 14px;
+}
+
 /* Celdas especiales */
 .asesorCell {
     display: flex;
@@ -612,6 +619,13 @@
     min-height: 80px;
 }
 
+.formError {
+    margin: 0;
+    color: #ff8a76;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
 .modalFooter {
     display: flex;
     justify-content: flex-end;
@@ -638,6 +652,11 @@
     color: white;
 }
 
+.btnCancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btnSave {
     background-color: #020202;
     border: none;
@@ -656,6 +675,12 @@
 .btnSave:hover {
     background-color: #e55a2b;
     transform: translateY(-1px);
+}
+
+.btnSave:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
 }
 
 @media (max-width: 960px) {

@@ -1,0 +1,155 @@
+/* Contenedor principal que une Aside y Contenido */
+.wrapper {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #0a0a0a; /* Fondo oscuro profundo */
+  color: #ffffff;
+}
+
+/* Área de contenido a la derecha */
+.main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --- ENCABEZADO REORGANIZADO --- */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.headerTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Espacio entre título, subtítulo y botón */
+}
+
+.pageTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: #94a3b8; /* Gris azulado suave */
+  margin: 0;
+}
+
+/* Botón debajo del texto */
+.btnPrimaryUnderText {
+  background-color: #ff6b00; /* Naranja Nexus */
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: fit-content;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
+}
+
+.btnPrimaryUnderText:hover {
+  background-color: #e66000;
+  transform: translateY(-2px);
+}
+
+/* --- TABLA Y TARJETA --- */
+.tableCard {
+  background-color: #111111;
+  border-radius: 12px;
+  border: 1px solid #222;
+  overflow: hidden;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableHead {
+  background-color: #1a1a1a;
+  border-bottom: 2px solid #222;
+}
+
+.th {
+  padding: 16px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tableRow {
+  border-bottom: 1px solid #222;
+  transition: background 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #161616;
+}
+
+.td {
+  padding: 16px;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+/* Badge de estado */
+.badge {
+  background-color: rgba(0, 255, 157, 0.1);
+  color: #00ff9d;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tdRight {
+  text-align: right;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* --- RESPONSIVO --- */
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+  }
+  
+  .main {
+    padding: 1rem;
+  }
+  
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #111;
+    border-bottom: 1px solid #222;
+  }
+}
+  
+   .className{
+    background-color: #0cda8b;
+   }

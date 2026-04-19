@@ -33,6 +33,8 @@ const Aside = ({ sidebarOpen, setSidebarOpen }) => {
       { icon: <MdBadge />, label: 'Asesores', url: '/asesoresadmin' },
       { icon: <MdGroups />, label: 'Clientes', url: '/ventasadmin' },
       { icon: <MdGroups />, label: 'Gestion Asesor', url: '/gestionasesor' },
+       { icon: <MdBadge />, label: 'Gestion Proyecto', url: '/proyectos' },
+      
     ],
     ASESOR: [
       { icon: <MdBadge />, label: 'Mi panel', url: '/asesores' },

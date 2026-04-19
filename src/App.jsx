@@ -9,6 +9,8 @@ import HistorialLead from "./pages/asesoresParteAdmin/historialLeadEstado";
 import InteraccionesAsesor from "./pages/asesoresParteAdmin/InteraccionesAsesor";
 import VentasPageAdmin from "./pages/ventas/VentasPage";
 import GestionAsesor from "./pages/gestionAsesor/asesorGestion"
+import GestionProyecto from "./pages//proyectos/proyectos"
+
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
         <Route path="/admin/lead-historial/:idLead" element={<HistorialLead />} />
         <Route path="/admin/asesor-interacciones/:idAsesor/:idLead" element={<InteraccionesAsesor />} />
         <Route path="/asesores/ventas" element={<VentasPageAsesor />} />
+        <Route path="/proyectos" element={< GestionProyecto/>} />
+
       </Routes>
     </BrowserRouter>
   );
