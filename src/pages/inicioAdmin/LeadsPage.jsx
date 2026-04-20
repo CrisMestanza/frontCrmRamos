@@ -4,6 +4,7 @@ import Aside from '../../templates/aside';
 import axios from "axios";
 import AsignarAsesorModal from './modalAsignar'; // Importa el nuevo archivo
 import ModalLead from './modalAgregarLead';
+import ModalAgregarNumero from './modalAgregarNumero';
 
 import {
   MdMoreVert, MdSearch, MdFilterList, MdChevronLeft,
@@ -77,7 +78,7 @@ const LeadsPage = () => {
     const obtenerAsesores = async () => {
       try {
         const response = await axios.get(
-          "https://api.ramosgrupo.lat/api/getasesores/"
+          "http://127.0.0.1:8000/api/getasesores/"
         );
         console.log(response.data)
         setDataAsesores(response.data);
@@ -102,7 +103,7 @@ const LeadsPage = () => {
     const obtenerLeads = async () => {
       const idUsuario = sessionStorage.getItem("id_usuario");
       try {
-        const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
+        const response = await axios.get(`http://127.0.0.1:8000/api/getleads/${idUsuario}/`);
         console.log(response.data)
         setDataLeads(response.data);
 
@@ -119,7 +120,7 @@ const LeadsPage = () => {
   useEffect(() => {
     const obtenerTotalVendidos = async () => {
       try {
-        const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsVendidos/");
+        const response = await axios.get("http://127.0.0.1:8000/api/totalleadsVendidos/");
         // IMPORTANTE: Usamos .total_vendidos porque así lo envía tu backend
         setTotalVendidos(response.data.total_vendidos || 0);
       } catch (error) {
@@ -134,7 +135,7 @@ const LeadsPage = () => {
   useEffect(() => {
     const obtenerTotalLeadsGenerales = async () => {
       try {
-        const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsgeneral/");
+        const response = await axios.get("http://127.0.0.1:8000/api/totalleadsgeneral/");
         // IMPORTANTE: Usamos .total_vendidos porque así lo envía tu backend
         setTotalLeadsGenerales(response.data.total || 0);
       } catch (error) {
@@ -150,7 +151,7 @@ const LeadsPage = () => {
     const totalLeads = async () => {
       try {
         const response = await axios.get(
-          "https://api.ramosgrupo.lat/api/totalleads/"
+          "http://127.0.0.1:8000/api/totalleads/"
         );
 
         setTotalLeads(response.data.total);
@@ -169,7 +170,7 @@ const LeadsPage = () => {
     const totalLeadsHoy = async () => {
       try {
         const response = await axios.get(
-          "https://api.ramosgrupo.lat/api/totalleadshoy/"
+          "http://127.0.0.1:8000/api/totalleadshoy/"
         );
 
         setTotalLeadsHoy(response.data.total);
@@ -186,6 +187,7 @@ const LeadsPage = () => {
   // Designar asesor
   const [tempAsesorId, setTempAsesorId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNumeroModalOpen, setIsNumeroModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null)
   
   const [isModalOpenAsignar, setIsModalOpenAsignar] = useState(false);
@@ -199,7 +201,7 @@ const LeadsPage = () => {
   const cambiarAsesor = async (lead, id_usuario) => {
     try {
       const idFinal = id_usuario === "" ? null : id_usuario;
-      await axios.patch(`https://api.ramosgrupo.lat/api/updatelead/${lead.id_lead}/`, {
+      await axios.patch(`http://127.0.0.1:8000/api/updatelead/${lead.id_lead}/`, {
         id_asesor: idFinal
       });
 
@@ -316,9 +318,18 @@ const LeadsPage = () => {
         <button
           className={styles.btnPrimary}
           onClick={() => setIsModalOpen(true)}
+          style={{ marginRight: '12px' }}
         >
           <MdPersonAdd className={styles.icon} />
           <span>Agregar Lead</span>
+        </button>
+
+        <button
+          className={styles.btnPrimary}
+          onClick={() => setIsNumeroModalOpen(true)}
+        >
+          <MdPersonAdd className={styles.icon} />
+          <span>Agregar Número</span>
         </button>
         {/* Tabs */}
         <div className={styles.tabs}>
@@ -472,6 +483,10 @@ const LeadsPage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onLeadAdded={handleLeadAdded}
+      />
+      <ModalAgregarNumero
+        isOpen={isNumeroModalOpen}
+        onClose={() => setIsNumeroModalOpen(false)}
       />
       {/*  Modal de ventas */}
 

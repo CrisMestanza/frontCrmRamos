@@ -24,8 +24,8 @@ const ModalLead = ({ isOpen, onClose, onLeadAdded }) => {
                 setLoading(true);
                 try {
                     const [resOrigen, resProyectos] = await Promise.all([
-                        axios.get('https://api.ramosgrupo.lat/api/getorigen/'),
-                        axios.get('https://api.ramosgrupo.lat/api/getpoyectos/')
+                        axios.get('http://127.0.0.1:8000/api/getorigen/'),
+                        axios.get('http://127.0.0.1:8000/api/getpoyectos/')
                     ]);
                     setOrigenes(resOrigen.data);
                     setProyectos(resProyectos.data);
@@ -61,7 +61,7 @@ const ModalLead = ({ isOpen, onClose, onLeadAdded }) => {
     };
 
     try {
-        const response = await axios.post('https://api.ramosgrupo.lat/api/savelead/', payload);
+        const response = await axios.post('http://127.0.0.1:8000/api/savelead/', payload);
         console.log("Guardado con éxito:", response.data);
         onLeadAdded();
         onClose();

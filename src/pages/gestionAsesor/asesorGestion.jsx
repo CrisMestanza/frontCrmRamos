@@ -7,7 +7,7 @@ import Aside from '../../templates/aside';
 
 const ASESORES_ENDPOINTS = [
   'http://127.0.0.1:8000/api/getasesores',
-  'https://api.ramosgrupo.lat/api/getasesores/',
+  'http://127.0.0.1:8000/api/getasesores/',
 ];
 const POST_ASESOR_ENDPOINT = 'http://127.0.0.1:8000/api/postasesores/';
 
@@ -103,6 +103,16 @@ const obtenerAsesoresDesdeApi = async () => {
   }
 
   throw ultimoError;
+};
+
+const crearAsesorEnApi = async (asesor) => {
+  const payload = {
+    ...asesor,
+    rol: 'ASESOR',
+    estado: 1,
+  };
+
+  return axios.post(POST_ASESOR_ENDPOINT, payload);
 };
 
 // --- NUEVO COMPONENTE: ModalConfirmarEliminar (ACTUALIZADO) ---

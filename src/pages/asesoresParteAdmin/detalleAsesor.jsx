@@ -24,12 +24,12 @@ const DetalleAsesor = () => {
     const fetchData = async () => {
       try {
         // 1. Obtener info del asesor
-        const resAsesores = await axios.get(`https://api.ramosgrupo.lat/api/getasesores/`);
+        const resAsesores = await axios.get(`http://127.0.0.1:8000/api/getasesores/`);
         const encontrado = resAsesores.data.find(u => u.id_usuario === parseInt(id));
         setAsesor(encontrado);
 
         // 2. Obtener Leads del asesor específico usando tu nueva ruta
-        const resLeads = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${id}/`);
+        const resLeads = await axios.get(`http://127.0.0.1:8000/api/getleads/${id}/`);
         setLeadsAsesor(resLeads.data);
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -56,7 +56,7 @@ const DetalleAsesor = () => {
   const handleDownloadExcel = async () => {
     try {
       // Usamos el 'id' de la URL que es el del asesor que estamos viendo
-      const res = await axios.get(`https://api.ramosgrupo.lat/api/getexcel/${id}/`);
+      const res = await axios.get(`http://127.0.0.1:8000/api/getexcel/${id}/`);
       const data = res.data;
 
       if (data.length === 0) {

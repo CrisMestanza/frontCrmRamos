@@ -14,9 +14,9 @@ const VentasPageAdmin = () => {
         const fetchData = async () => {
             try {
                 const [resVentas, resTotal, resVendidos] = await Promise.all([
-                    axios.get("https://api.ramosgrupo.lat/api/getventas/"),
-                    axios.get("https://api.ramosgrupo.lat/api/totalleadsgeneral/"),
-                    axios.get("https://api.ramosgrupo.lat/api/totalleadsVendidos/")
+                    axios.get("http://127.0.0.1:8000/api/getventas/"),
+                    axios.get("http://127.0.0.1:8000/api/totalleadsgeneral/"),
+                    axios.get("http://127.0.0.1:8000/api/totalleadsVendidos/")
                 ]);
 
                 setVentas(resVentas.data);

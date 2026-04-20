@@ -19,7 +19,7 @@ const HistorialLead = () => {
     useEffect(() => {
         const fetchHistorial = async () => {
             try {
-                const res = await axios.get(`https://api.ramosgrupo.lat/api/gethistorialestadolead/${idLead}/`);
+                const res = await axios.get(`http://127.0.0.1:8000/api/gethistorialestadolead/${idLead}/`);
                 setHistorial(res.data);
                 setFilteredHistorial(res.data);
             } catch (error) {
