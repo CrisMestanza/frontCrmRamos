@@ -20,7 +20,7 @@ const ModalAgregarNumero = ({ isOpen, onClose }) => {
         setLoading(true);
 
         try {
-            await axios.post('http://127.0.0.1:8000/api/agregarnumero/', {
+            await axios.post('https://api.ramosgrupo.lat/api/agregarnumero/', {
                 numero: numero.trim()
             });
 

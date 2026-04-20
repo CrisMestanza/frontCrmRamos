@@ -48,7 +48,7 @@ const ParteAsesor = () => {
     const obtenerLeads = async () => {
       const idUsuario = sessionStorage.getItem("id_usuario");
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/getleads/${idUsuario}/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
 
         setDataLeads(response.data);
 
@@ -72,7 +72,7 @@ const ParteAsesor = () => {
       if (!idUsuario) return;
 
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/totalleadsgeneralAsesor/${idUsuario}/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/totalleadsgeneralAsesor/${idUsuario}/`);
         console.log(response.data);
         // Si tu API devuelve un número directo:
         setTotalLeadsHoy(response.data.total);
@@ -102,7 +102,7 @@ const ParteAsesor = () => {
       if (!idUsuario) return;
 
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/totalleadsVendidosAsesor/${idUsuario}/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/totalleadsVendidosAsesor/${idUsuario}/`);
         console.log("Total leads vendidos:", response.data);
         // Si tu API devuelve un número directo:
         setTotalLeadsVendidos(response.data.total_vendidos);
@@ -127,7 +127,7 @@ const ParteAsesor = () => {
   useEffect(() => {
     const obtenerEstados = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/getestados/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/getestados/`);
         console.log(response.data)
         setDataEstados(response.data);
       } catch (error) {
@@ -160,7 +160,7 @@ const ParteAsesor = () => {
     try {
 
       await axios.patch(
-        `http://127.0.0.1:8000/api/updateleadestado/${id_lead}/`,
+        `https://api.ramosgrupo.lat/api/updateleadestado/${id_lead}/`,
         {
           id_estado: Number(id_estado)
         }
@@ -185,7 +185,7 @@ const ParteAsesor = () => {
       );
 
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/getsubestados/${id_estado}/`
+        `https://api.ramosgrupo.lat/api/getsubestados/${id_estado}/`
       );
 
       setDataSubEstados(response.data);
@@ -199,7 +199,7 @@ const ParteAsesor = () => {
   const confirmarVenta = async () => {
     try {
       // 1. Guardar la venta en tu nuevo endpoint
-      await axios.post(`http://127.0.0.1:8000/api/saveventas/${idLeadSeleccionado}/`, {
+      await axios.post(`https://api.ramosgrupo.lat/api/saveventas/${idLeadSeleccionado}/`, {
         monto: Number(datosVenta.monto),
         descripcion_venta: datosVenta.descripcion
       });
@@ -236,7 +236,7 @@ const ParteAsesor = () => {
     try {
 
       await axios.patch(
-        `http://127.0.0.1:8000/api/updateleadsubestado/${id_lead}/`,
+        `https://api.ramosgrupo.lat/api/updateleadsubestado/${id_lead}/`,
         {
           id_subestado: Number(id_subestado),
           comentario: comentarioAEnviar
@@ -272,7 +272,7 @@ const ParteAsesor = () => {
   useEffect(() => {
     const obtenerTipoIteraciones = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/gettipointeraccion/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/gettipointeraccion/`);
         console.log(response.data)
         setDataTipoIteraciones(response.data);
       } catch (error) {
@@ -291,7 +291,7 @@ const ParteAsesor = () => {
 
     if (tipo === 1) { // WhatsApp
       try {
-        await axios.post("http://127.0.0.1:8000/api/saveiteracion/", {
+        await axios.post("https://api.ramosgrupo.lat/api/saveiteracion/", {
           id_lead: id_lead,
           id_usuario: idUsuario,
           id_tipo_interaccion: 1,
@@ -314,7 +314,7 @@ const ParteAsesor = () => {
  const finalizarRegistroLlamada = async () => {
   const idUsuario = sessionStorage.getItem("id_usuario");
   try {
-    await axios.post("http://127.0.0.1:8000/api/saveiteracion/", {
+    await axios.post("https://api.ramosgrupo.lat/api/saveiteracion/", {
       id_lead: callLeadId,
       id_usuario: idUsuario,
       id_tipo_interaccion: 2,

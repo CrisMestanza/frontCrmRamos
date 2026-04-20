@@ -26,7 +26,7 @@ const LeadsPageMain = () => {
   const obtenerLeads = async () => {
     const idUsuario = sessionStorage.getItem("id_usuario");
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/getleads/${idUsuario}/`);
+      const res = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
       setDataLeads(res.data);
     } catch (err) { console.log(err); }
   };

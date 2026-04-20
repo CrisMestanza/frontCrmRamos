@@ -6,10 +6,10 @@ import styles2 from './asesorGestion.module.css';
 import Aside from '../../templates/aside';
 
 const ASESORES_ENDPOINTS = [
-  'http://127.0.0.1:8000/api/getasesores',
-  'http://127.0.0.1:8000/api/getasesores/',
+  'https://api.ramosgrupo.lat/api/getasesores',
+  'https://api.ramosgrupo.lat/api/getasesores/',
 ];
-const POST_ASESOR_ENDPOINT = 'http://127.0.0.1:8000/api/postasesores/';
+const POST_ASESOR_ENDPOINT = 'https://api.ramosgrupo.lat/api/postasesores/';
 
 const AVATAR_COLORS = ['#ff6b35', '#4d8dff', '#2ecc71', '#f5b700', '#8b5cf6', '#14b8a6'];
 
