@@ -3,7 +3,7 @@ import axios from 'axios';
 import { MdClose, MdSave } from 'react-icons/md';
 import styles from './modalAgregarLead.module.css';
 
-const ModalAgregarNumero = ({ isOpen, onClose }) => {
+const ModalAgregarNumero = ({ isOpen, onClose, onNumeroAdded }) => {
     const [numero, setNumero] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -24,6 +24,8 @@ const ModalAgregarNumero = ({ isOpen, onClose }) => {
                 numero: numero.trim()
             });
 
+            onNumeroAdded?.();
+            window.dispatchEvent(new Event("leads:updated"));
             alert('Numero agregado exitosamente');
             handleClose();
         } catch (error) {

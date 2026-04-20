@@ -63,7 +63,8 @@ const ModalLead = ({ isOpen, onClose, onLeadAdded }) => {
     try {
         const response = await axios.post('https://api.ramosgrupo.lat/api/savelead/', payload);
         console.log("Guardado con éxito:", response.data);
-        onLeadAdded();
+        onLeadAdded?.();
+        window.dispatchEvent(new Event("leads:updated"));
         onClose();
         // Reset...
         setFormData({

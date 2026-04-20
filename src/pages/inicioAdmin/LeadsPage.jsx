@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './leads.module.css';
 import Aside from '../../templates/aside';
 import axios from "axios";
@@ -72,6 +72,11 @@ const metrics = [
 const LeadsPage = () => {
   
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
+  const [dataLeads, setDataLeads] = useState([]);
+  const [totalVendidos, setTotalVendidos] = useState(0);
+  const [totalLeadsGenerales, setTotalLeadsGenerales] = useState(0);
+  const [totalLeads, setTotalLeads] = useState(0);
+  const [totalLeadsHoy, setTotalLeadsHoy] = useState(0);
   // Obtener datos de los asesores
   const [dataAsesores, setDataAsesores] = useState([]);
   useEffect(() => {
@@ -91,98 +96,97 @@ const LeadsPage = () => {
     obtenerAsesores();
   }, []);
 
+  const obtenerLeads = useCallback(async () => {
+    const idUsuario = sessionStorage.getItem("id_usuario");
+    try {
+      const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
+      setDataLeads(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  const obtenerTotalVendidos = useCallback(async () => {
+    try {
+      const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsVendidos/");
+      setTotalVendidos(response.data.total_vendidos || 0);
+    } catch (error) {
+      console.error("Error al obtener total vendidos:", error);
+    }
+  }, []);
+
+  const obtenerTotalLeadsGenerales = useCallback(async () => {
+    try {
+      const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsgeneral/");
+      setTotalLeadsGenerales(response.data.total || 0);
+    } catch (error) {
+      console.error("Error al obtener total de leads generales:", error);
+    }
+  }, []);
+
+  const obtenerTotalLeads = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        "https://api.ramosgrupo.lat/api/totalleads/"
+      );
+      setTotalLeads(response.data.total);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  const obtenerTotalLeadsHoy = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        "https://api.ramosgrupo.lat/api/totalleadshoy/"
+      );
+      setTotalLeadsHoy(response.data.total);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  const refrescarLeads = useCallback(async () => {
+    await Promise.all([
+      obtenerLeads(),
+      obtenerTotalVendidos(),
+      obtenerTotalLeadsGenerales(),
+      obtenerTotalLeads(),
+      obtenerTotalLeadsHoy(),
+    ]);
+  }, [
+    obtenerLeads,
+    obtenerTotalVendidos,
+    obtenerTotalLeadsGenerales,
+    obtenerTotalLeads,
+    obtenerTotalLeadsHoy,
+  ]);
+
+  useEffect(() => {
+    refrescarLeads();
+
+    const intervaloRefresco = setInterval(refrescarLeads, 15000);
+    const refrescarSiPaginaVisible = () => {
+      if (!document.hidden) {
+        refrescarLeads();
+      }
+    };
+
+    window.addEventListener("focus", refrescarLeads);
+    window.addEventListener("leads:updated", refrescarLeads);
+    document.addEventListener("visibilitychange", refrescarSiPaginaVisible);
+
+    return () => {
+      clearInterval(intervaloRefresco);
+      window.removeEventListener("focus", refrescarLeads);
+      window.removeEventListener("leads:updated", refrescarLeads);
+      document.removeEventListener("visibilitychange", refrescarSiPaginaVisible);
+    };
+  }, [refrescarLeads]);
+
   const handleLeadAdded = () => {
-    // Aquí llamas a tu función obtenerLeads() para refrescar la tabla
-    console.log("Nuevo lead agregado, refrescando tabla...");
+    refrescarLeads();
   };
-  // Para obtener los leads
-
-  const [dataLeads, setDataLeads] = useState([]);
-
-  useEffect(() => {
-    const obtenerLeads = async () => {
-      const idUsuario = sessionStorage.getItem("id_usuario");
-      try {
-        const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
-        console.log(response.data)
-        setDataLeads(response.data);
-
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    obtenerLeads();
-  }, []);
-  /// Para la tasa de conversión
-  const [totalVendidos, setTotalVendidos] = useState(0);
-
-  useEffect(() => {
-    const obtenerTotalVendidos = async () => {
-      try {
-        const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsVendidos/");
-        // IMPORTANTE: Usamos .total_vendidos porque así lo envía tu backend
-        setTotalVendidos(response.data.total_vendidos || 0);
-      } catch (error) {
-        console.error("Error al obtener total vendidos:", error);
-      }
-    };
-    obtenerTotalVendidos();
-  }, []);
-
-  const [totalLeadsGenerales, setTotalLeadsGenerales] = useState(0);
-
-  useEffect(() => {
-    const obtenerTotalLeadsGenerales = async () => {
-      try {
-        const response = await axios.get("https://api.ramosgrupo.lat/api/totalleadsgeneral/");
-        // IMPORTANTE: Usamos .total_vendidos porque así lo envía tu backend
-        setTotalLeadsGenerales(response.data.total || 0);
-      } catch (error) {
-        console.error("Error al obtener total vendidos:", error);
-      }
-    };
-    obtenerTotalLeadsGenerales();
-  }, []);
-
-  // Total de leads 
-  const [totalLeads, setTotalLeads] = useState(0);
-  useEffect(() => {
-    const totalLeads = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.ramosgrupo.lat/api/totalleads/"
-        );
-
-        setTotalLeads(response.data.total);
-
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    totalLeads();
-  }, []);
-
-  // Total de leads hoy
-  const [totalLeadsHoy, setTotalLeadsHoy] = useState(0);
-  useEffect(() => {
-    const totalLeadsHoy = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.ramosgrupo.lat/api/totalleadshoy/"
-        );
-
-        setTotalLeadsHoy(response.data.total);
-
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    totalLeadsHoy();
-  }, []);
-
 
   // Designar asesor
   const [tempAsesorId, setTempAsesorId] = useState("");
@@ -207,8 +211,7 @@ const LeadsPage = () => {
 
       setIsModalOpenAsignar(false); // Cerramos el modal
       alert(`Asesor asignado correctamente`);
-
-      // Aquí podrías volver a llamar a obtenerLeads() para refrescar la tabla
+      refrescarLeads();
     } catch (error) {
       console.error("Error al asignar", error);
     }
@@ -487,6 +490,7 @@ const LeadsPage = () => {
       <ModalAgregarNumero
         isOpen={isNumeroModalOpen}
         onClose={() => setIsNumeroModalOpen(false)}
+        onNumeroAdded={handleLeadAdded}
       />
       {/*  Modal de ventas */}
 
