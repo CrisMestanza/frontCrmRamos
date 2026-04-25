@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { MdSearch, MdFilterList, MdMoreVert, MdChevronLeft, MdChevronRight } from "react-icons/md";
+import {
+  MdAdminPanelSettings,
+  MdFilterList,
+  MdMoreVert,
+  MdPersonSearch,
+  MdSearch,
+  MdTrendingUp,
+  MdChevronLeft,
+  MdChevronRight,
+} from "react-icons/md";
 import axios from "axios";
 import Aside from '../../templates/aside';
 import styles from './asesoresParteAdmin.module.css';
@@ -14,6 +23,12 @@ const AsesoresParteAdmin = () => {
   const handleRowClick = (id) => {
     navigate(`/asesoresadmin/detalle/${id}`);
   };
+
+  const totalActivos = dataAsesores.filter((asesor) => Number(asesor.estado) === 1).length;
+  const totalAdmins = dataAsesores.filter((asesor) => asesor.rol === 'ADMIN').length;
+  const totalVentas = dataAsesores.filter((asesor) => asesor.rol === 'ASESOR').length;
+  const porcentajeAdmins = totalActivos ? Math.round((totalAdmins / totalActivos) * 100) : 0;
+  const porcentajeVentas = totalActivos ? Math.round((totalVentas / totalActivos) * 100) : 0;
 
 
   // Obtener asesores desde la API
@@ -61,40 +76,54 @@ const AsesoresParteAdmin = () => {
 
         {/* 3. METRICS (Adaptadas a Asesores) */}
         <div className={styles.metricsGrid}>
-          <div className={styles.metricCard}>
+          <div className={`${styles.metricCard} ${styles.metricToneOrange}`}>
             <div className={styles.metricTop}>
-              <p className={styles.metricLabel}>Total Asesores</p>
-              <span className={styles.metricBadge}>Activos</span>
+              <div>
+                <p className={styles.metricLabel}>Total Asesores</p>
+                <span className={styles.metricBadge}>Activos</span>
+              </div>
+              <div className={styles.metricIconBox}>
+                <MdPersonSearch size="1.25em" />
+              </div>
             </div>
-            <p className={styles.metricValue}>{dataAsesores.length}</p>
+            <p className={styles.metricValue}>{totalActivos}</p>
+            <p className={styles.metricDescription}>Usuarios activos disponibles para seguimiento comercial.</p>
             <div className={styles.progressTrack}>
               <div className={styles.progressFill} style={{ width: '100%' }} />
             </div>
           </div>
 
-          <div className={styles.metricCard}>
+          <div className={`${styles.metricCard} ${styles.metricToneRed}`}>
             <div className={styles.metricTop}>
-              <p className={styles.metricLabel}>Admins</p>
-              <span className={styles.metricBadge}>Control</span>
+              <div>
+                <p className={styles.metricLabel}>Admins</p>
+                <span className={styles.metricBadge}>Control</span>
+              </div>
+              <div className={styles.metricIconBox}>
+                <MdAdminPanelSettings size="1.25em" />
+              </div>
             </div>
-            <p className={styles.metricValue}>
-              {dataAsesores.filter(a => a.rol === 'ADMIN').length}
-            </p>
+            <p className={styles.metricValue}>{totalAdmins}</p>
+            <p className={styles.metricDescription}>Perfiles con acceso de gestion administrativa.</p>
             <div className={styles.progressTrack}>
-              <div className={styles.progressFill} style={{ width: '20%', backgroundColor: '#ef4444' }} />
+              <div className={styles.progressFill} style={{ width: `${porcentajeAdmins}%` }} />
             </div>
           </div>
 
-          <div className={styles.metricCard}>
+          <div className={`${styles.metricCard} ${styles.metricToneGreen}`}>
             <div className={styles.metricTop}>
-              <p className={styles.metricLabel}>Asesores de Ventas</p>
-              <span className={styles.metricBadge}>Ventas</span>
+              <div>
+                <p className={styles.metricLabel}>Asesores de Ventas</p>
+                <span className={styles.metricBadge}>Ventas</span>
+              </div>
+              <div className={styles.metricIconBox}>
+                <MdTrendingUp size="1.25em" />
+              </div>
             </div>
-            <p className={styles.metricValue}>
-              {dataAsesores.filter(a => a.rol === 'ASESOR').length}
-            </p>
+            <p className={styles.metricValue}>{totalVentas}</p>
+            <p className={styles.metricDescription}>Equipo encargado de gestionar leads y cierres.</p>
             <div className={styles.progressTrack}>
-              <div className={styles.progressFill} style={{ width: '80%', backgroundColor: '#10b981' }} />
+              <div className={styles.progressFill} style={{ width: `${porcentajeVentas}%` }} />
             </div>
           </div>
         </div>

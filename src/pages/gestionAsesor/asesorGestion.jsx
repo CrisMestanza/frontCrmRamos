@@ -1,17 +1,36 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { FiActivity, FiPhoneCall, FiSave, FiSearch, FiTrash2, FiTrendingUp, FiUsers } from 'react-icons/fi';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  FiActivity,
+  FiCheckCircle,
+  FiEdit2,
+  FiPieChart,
+  FiSave,
+  FiSearch,
+  FiShield,
+  FiTrash2,
+  FiTrendingUp,
+  FiUserCheck,
+  FiUsers,
+} from 'react-icons/fi';
 import styles from '../inicioAdmin/leads.module.css';
 import styles2 from './asesorGestion.module.css';
 import Aside from '../../templates/aside';
 
-const ASESORES_ENDPOINTS = [
-  'https://api.ramosgrupo.lat/api/getasesores',
-  'https://api.ramosgrupo.lat/api/getasesores/',
-];
-const POST_ASESOR_ENDPOINT = 'https://api.ramosgrupo.lat/api/postasesores/';
+const API_BASE = 'https://api.ramosgrupo.lat/api';
+const FORMULARIO_ASESOR_INICIAL = {
+  nombre: '',
+  email: '',
+  telefono: '',
+  password: '',
+  rol: 'ASESOR',
+};
 
 const AVATAR_COLORS = ['#ff6b35', '#4d8dff', '#2ecc71', '#f5b700', '#8b5cf6', '#14b8a6'];
+
+const normalizarRol = (rol = '') => rol.toString().trim().toUpperCase();
+const esAsesorVentas = (rol = '') => ['ASESOR', 'VENTAS', 'ASESOR_VENTAS'].includes(normalizarRol(rol));
+const esAdmin = (rol = '') => normalizarRol(rol) === 'ADMIN';
 
 const obtenerIniciales = (nombre = '') =>
   nombre
@@ -24,19 +43,9 @@ const obtenerIniciales = (nombre = '') =>
 
 const obtenerColorAvatar = (id = 0) => AVATAR_COLORS[id % AVATAR_COLORS.length];
 
-const formatearEstado = (estado) => (Number(estado) === 1 ? 'Activo' : 'Inactivo');
-const FORMULARIO_ASESOR_INICIAL = {
-  nombre: '',
-  email: '',
-  telefono: '',
-  password: '',
-};
-
 const formatearFecha = (fecha) => {
   if (!fecha) return 'Sin fecha';
-
   const fechaParseada = new Date(fecha);
-
   if (Number.isNaN(fechaParseada.getTime())) return 'Sin fecha';
 
   return fechaParseada.toLocaleDateString('es-PE', {
@@ -45,34 +54,6 @@ const formatearFecha = (fecha) => {
     year: 'numeric',
   });
 };
-
-const esDelMesActual = (fecha) => {
-  if (!fecha) return false;
-
-  const fechaParseada = new Date(fecha);
-
-  if (Number.isNaN(fechaParseada.getTime())) return false;
-
-  const hoy = new Date();
-
-  return (
-    fechaParseada.getMonth() === hoy.getMonth() &&
-    fechaParseada.getFullYear() === hoy.getFullYear()
-  );
-};
-
-const normalizarAsesores = (data) =>
-  (Array.isArray(data) ? data : [])
-    .filter((usuario) => usuario.rol === 'ASESOR')
-    .map((usuario) => ({
-      id_usuario: usuario.id_usuario,
-      nombre: usuario.nombre || 'Sin nombre',
-      email: usuario.email || 'Sin correo',
-      telefono: usuario.telefono || 'Sin telefono',
-      estado: Number(usuario.estado),
-      fecha_creacion: usuario.fecha_creacion,
-      fechaTexto: formatearFecha(usuario.fecha_creacion),
-    }));
 
 const obtenerMensajeError = (error, fallback = 'No se pudo completar la operacion.') => {
   const detalle = error?.response?.data;
@@ -90,82 +71,97 @@ const obtenerMensajeError = (error, fallback = 'No se pudo completar la operacio
   return fallback;
 };
 
-const obtenerAsesoresDesdeApi = async () => {
-  let ultimoError = null;
+const normalizarUsuarios = (data) =>
+  (Array.isArray(data) ? data : []).map((usuario) => ({
+    id_usuario: usuario.id_usuario,
+    nombre: usuario.nombre || 'Sin nombre',
+    email: usuario.email || 'Sin correo',
+    telefono: usuario.telefono || 'Sin telefono',
+    rol: normalizarRol(usuario.rol),
+    estado: Number(usuario.estado ?? 1),
+    fecha_creacion: usuario.fecha_creacion,
+    fechaTexto: formatearFecha(usuario.fecha_creacion),
+  }));
 
-  for (const endpoint of ASESORES_ENDPOINTS) {
-    try {
-      const response = await axios.get(endpoint);
-      return normalizarAsesores(response.data);
-    } catch (fetchError) {
-      ultimoError = fetchError;
-    }
-  }
-
-  throw ultimoError;
+const obtenerUsuariosDesdeApi = async () => {
+  const response = await axios.get(`${API_BASE}/getasesores/`);
+  return normalizarUsuarios(response.data);
 };
 
-const crearAsesorEnApi = async (asesor) => {
+const obtenerMetricasDesdeApi = async () => {
+  const [totalLeads, totalVendidos, leadsHoy] = await Promise.all([
+    axios.get(`${API_BASE}/totalleadsgeneral/`),
+    axios.get(`${API_BASE}/totalleadsVendidos/`),
+    axios.get(`${API_BASE}/totalleadshoy/`),
+  ]);
+
+  return {
+    totalLeads: Number(totalLeads.data?.total ?? 0),
+    totalVendidos: Number(totalVendidos.data?.total_vendidos ?? 0),
+    leadsHoy: Number(leadsHoy.data?.total ?? 0),
+  };
+};
+
+const guardarAsesorEnApi = (asesor, idUsuario) => {
   const payload = {
-    ...asesor,
-    rol: 'ASESOR',
+    nombre: asesor.nombre,
+    email: asesor.email,
+    telefono: asesor.telefono,
+    rol: asesor.rol,
     estado: 1,
   };
 
-  return axios.post(POST_ASESOR_ENDPOINT, payload);
+  if (asesor.password) payload.password = asesor.password;
+
+  if (idUsuario) {
+    return axios.patch(`${API_BASE}/updateasesor/${idUsuario}/`, payload);
+  }
+
+  return axios.post(`${API_BASE}/postasesores/`, payload);
 };
 
-// --- NUEVO COMPONENTE: ModalConfirmarEliminar (ACTUALIZADO) ---
-const ModalConfirmarEliminar = ({ isOpen, onClose, onConfirm, nombreAsesor, loading }) => {
+const eliminarAsesorEnApi = (idUsuario) =>
+  axios.patch(`${API_BASE}/deleteasesor/${idUsuario}/`);
+
+const ModalResultado = ({ isOpen, onClose, title, message }) => {
   if (!isOpen) return null;
 
   return (
     <div className={styles2.modalOverlay} onClick={onClose}>
-      <div
-        className={styles2.modalContent}
-        style={{ maxWidth: '450px', backgroundColor: '#111', padding: '0', overflow: 'hidden' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className={styles2.modalHeader} style={{ backgroundColor: '#ff6b35', padding: '20px' }}>
-          <div>
-            <h2 className={styles2.modalTitle} style={{ color: '#ffffff' }}>Confirmar Eliminacion</h2>
-            <p className={styles2.modalSubtitle} style={{ color: '#333' }}>Esta accion no se puede deshacer</p>
-          </div>
-          <button className={styles2.btnCloseX} style={{ color: '#000000' }} onClick={onClose}>&times;</button>
+      <div className={styles2.resultModal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles2.resultIcon}>
+          <FiCheckCircle />
         </div>
+        <h2 className={styles2.confirmTitle}>{title}</h2>
+        <p className={styles2.confirmText}>{message}</p>
+        <button type="button" className={styles2.btnSave} onClick={onClose}>
+          Aceptar
+        </button>
+      </div>
+    </div>
+  );
+};
 
-        <div className={styles2.modalBody} style={{ padding: '40px 20px', textAlign: 'center' }}>
-          <p style={{ color: '#fff', fontSize: '1.2rem', lineHeight: '1.6' }}>
-            Estas seguro que deseas eliminar este asesor?<br />
-            <span style={{ fontWeight: 'bold', display: 'block', marginTop: '10px' }}>{nombreAsesor}</span>
-          </p>
+const ModalConfirmarEliminar = ({ isOpen, onClose, onConfirm, asesor, loading }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className={styles2.modalOverlay} onClick={onClose}>
+      <div className={styles2.confirmModal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles2.confirmIcon}>
+          <FiTrash2 />
         </div>
-
-        <div
-          className={styles2.modalFooter}
-          style={{
-            justifyContent: 'center',
-            gap: '30px',
-            borderTop: '1px solid #222',
-            padding: '20px',
-            backgroundColor: 'transparent',
-          }}
-        >
-          <button
-            type="button"
-            className={styles2.btnCancel}
-            style={{ backgroundColor: '#2a2a2e', border: '1px solid #444', width: '140px' }}
-            onClick={onClose}
-          >
+        <h2 className={styles2.confirmTitle}>Eliminar asesor</h2>
+        <p className={styles2.confirmText}>
+          El asesor pasara a estado inactivo y no aparecera en la gestion.
+        </p>
+        <strong className={styles2.confirmName}>{asesor?.nombre}</strong>
+        <div className={styles2.confirmActions}>
+          <button type="button" className={styles2.btnCancel} onClick={onClose} disabled={loading}>
             Cancelar
           </button>
-          <button
-            type="button"
-            className={styles2.btnCancel}
-            style={{ backgroundColor: '#2a2a2e', border: '1px solid #444', width: '140px', color: '#fff' }}
-            onClick={onConfirm}
-          >
-            Aceptar
+          <button type="button" className={styles2.btnDanger} onClick={onConfirm} disabled={loading}>
+            {loading ? 'Eliminando...' : 'Eliminar'}
           </button>
         </div>
       </div>
@@ -173,11 +169,27 @@ const ModalConfirmarEliminar = ({ isOpen, onClose, onConfirm, nombreAsesor, load
   );
 };
 
-// --- COMPONENTE: ModalAgregarAsesor (Se mantiene intacto) ---
-const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
+const ModalAsesor = ({ isOpen, onClose, onSave, asesorEditar }) => {
   const [formData, setFormData] = useState(FORMULARIO_ASESOR_INICIAL);
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (asesorEditar) {
+      setFormData({
+        nombre: asesorEditar.nombre || '',
+        email: asesorEditar.email === 'Sin correo' ? '' : asesorEditar.email || '',
+        telefono: asesorEditar.telefono === 'Sin telefono' ? '' : asesorEditar.telefono || '',
+        password: '',
+        rol: asesorEditar.rol || 'ASESOR',
+      });
+      return;
+    }
+
+    setFormData(FORMULARIO_ASESOR_INICIAL);
+  }, [asesorEditar, isOpen]);
 
   if (!isOpen) return null;
 
@@ -188,15 +200,12 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
 
   const handleClose = () => {
     if (saving) return;
-
-    setFormData(FORMULARIO_ASESOR_INICIAL);
     setSubmitError('');
     onClose();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setSaving(true);
     setSubmitError('');
 
@@ -206,10 +215,9 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
         email: formData.email.trim(),
         telefono: formData.telefono.trim(),
         password: formData.password,
+        rol: formData.rol,
       });
-
-      setFormData(FORMULARIO_ASESOR_INICIAL);
-      onClose();
+      handleClose();
     } catch (saveError) {
       setSubmitError(obtenerMensajeError(saveError, 'No se pudo guardar el asesor.'));
     } finally {
@@ -222,10 +230,16 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
       <div className={styles2.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles2.modalHeader}>
           <div>
-            <h2 className={styles2.modalTitle}>Registrar Nuevo Asesor</h2>
-            <p className={styles2.modalSubtitle}>Vincula un nuevo miembro a tu equipo de trabajo</p>
+            <h2 className={styles2.modalTitle}>
+              {asesorEditar ? 'Editar Asesor' : 'Registrar Nuevo Asesor'}
+            </h2>
+            <p className={styles2.modalSubtitle}>
+              Actualiza los datos del equipo comercial y administrativo.
+            </p>
           </div>
-          <button className={styles2.btnCloseX} onClick={handleClose}>&times;</button>
+          <button type="button" className={styles2.btnCloseX} onClick={handleClose}>
+            &times;
+          </button>
         </div>
         <form onSubmit={handleSubmit} className={styles2.modalForm}>
           <div className={styles2.formGroupFull}>
@@ -242,9 +256,9 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
           </div>
           <div className={styles2.formRow}>
             <div className={styles2.formGroup}>
-              <label className={styles2.formLabel}>CORREO ELECTRONICO *</label>
+              <label className={styles2.formLabel}>Correo Electronico *</label>
               <input
-                type="text"
+                type="email"
                 name="email"
                 placeholder="usuario@gmail.com"
                 className={styles2.formInput}
@@ -254,7 +268,7 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
               />
             </div>
             <div className={styles2.formGroup}>
-              <label className={styles2.formLabel}>TELEFONO</label>
+              <label className={styles2.formLabel}>Telefono</label>
               <input
                 type="tel"
                 name="telefono"
@@ -265,21 +279,39 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
               />
             </div>
           </div>
-          <div className={styles2.formGroupFull}>
-            <label className={styles2.formLabel}>CONTRASENA *</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Ingresa una contraseña"
-              className={styles2.formInput}
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+          <div className={styles2.formRow}>
+            <div className={styles2.formGroup}>
+              <label className={styles2.formLabel}>Rol</label>
+              <select
+                name="rol"
+                className={styles2.formSelect}
+                value={formData.rol}
+                onChange={handleChange}
+              >
+                <option value="ASESOR">Asesor de Ventas</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            <div className={styles2.formGroup}>
+              <label className={styles2.formLabel}>
+                {asesorEditar ? 'Nueva contrasena' : 'Contrasena *'}
+              </label>
+              <input
+                type="password"
+                name="password"
+                placeholder={asesorEditar ? 'Dejar vacio para no cambiar' : 'Ingresa una contrasena'}
+                className={styles2.formInput}
+                value={formData.password}
+                onChange={handleChange}
+                required={!asesorEditar}
+              />
+            </div>
           </div>
           {submitError && <p className={styles2.formError}>{submitError}</p>}
           <div className={styles2.modalFooter}>
-            <button type="button" className={styles2.btnCancel} onClick={handleClose} disabled={saving}>Cancelar</button>
+            <button type="button" className={styles2.btnCancel} onClick={handleClose} disabled={saving}>
+              Cancelar
+            </button>
             <button type="submit" className={styles2.btnSave} disabled={saving}>
               <FiSave size={16} />
               {saving ? 'Guardando...' : 'Guardar Asesor'}
@@ -291,127 +323,175 @@ const ModalAgregarAsesor = ({ isOpen, onClose, onSave }) => {
   );
 };
 
-// --- COMPONENTE PRINCIPAL: GestionAsesores ---
 const GestionAsesores = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [asesorEditar, setAsesorEditar] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [asesorAEliminar, setAsesorAEliminar] = useState(null);
-  const [listaAsesores, setListaAsesores] = useState([]);
+  const [listaUsuarios, setListaUsuarios] = useState([]);
+  const [metricasApi, setMetricasApi] = useState({ totalLeads: 0, totalVendidos: 0, leadsHoy: 0 });
   const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
+  const [resultado, setResultado] = useState(null);
+
+  const cargarDatos = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const [usuarios, metricas] = await Promise.all([
+        obtenerUsuariosDesdeApi(),
+        obtenerMetricasDesdeApi(),
+      ]);
+      setListaUsuarios(usuarios);
+      setMetricasApi(metricas);
+    } catch (fetchError) {
+      console.error('Error al obtener datos de gestion:', fetchError);
+      setListaUsuarios([]);
+      setError('No se pudieron cargar los datos desde la API.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-
-    const cargarAsesores = async () => {
-      setLoading(true);
-      setError('');
-
-      try {
-        const asesores = await obtenerAsesoresDesdeApi();
-        if (!isMounted) return;
-        setListaAsesores(asesores);
-      } catch (fetchError) {
-        if (!isMounted) return;
-        console.error('Error al obtener asesores:', fetchError);
-        setListaAsesores([]);
-        setError('No se pudieron cargar los asesores desde la API.');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    cargarAsesores();
-
-    return () => {
-      isMounted = false;
-    };
+    cargarDatos();
   }, []);
+
+  const usuariosActivos = listaUsuarios.filter((usuario) => usuario.estado === 1);
+  const admins = usuariosActivos.filter((usuario) => esAdmin(usuario.rol));
+  const asesoresVentas = usuariosActivos.filter((usuario) => esAsesorVentas(usuario.rol));
+  const tasaConversion = metricasApi.totalLeads
+    ? Math.round((metricasApi.totalVendidos / metricasApi.totalLeads) * 100)
+    : 0;
+
+  const asesoresFiltrados = useMemo(() => {
+    const termino = busqueda.trim().toLowerCase();
+    const base = usuariosActivos.filter((usuario) => esAsesorVentas(usuario.rol));
+
+    if (!termino) return base;
+
+    return base.filter((asesor) =>
+      [asesor.nombre, asesor.email, asesor.telefono, asesor.rol]
+        .some((valor) => valor.toLowerCase().includes(termino)),
+    );
+  }, [busqueda, listaUsuarios]);
+
+  const metricas = [
+    {
+      label: 'Total Asesores',
+      value: usuariosActivos.length.toLocaleString('es-PE'),
+      unit: 'usuarios',
+      description: 'Usuarios activos disponibles dentro del equipo operativo.',
+      highlight: `${usuariosActivos.length} activos`,
+      progress: 100,
+      icon: FiUsers,
+      tone: 'Orange',
+    },
+    {
+      label: 'Admins',
+      value: admins.length.toLocaleString('es-PE'),
+      unit: 'gestion',
+      description: 'Usuarios con permisos administrativos activos.',
+      highlight: `${admins.length} admins`,
+      progress: usuariosActivos.length ? Math.round((admins.length / usuariosActivos.length) * 100) : 0,
+      icon: FiShield,
+      tone: 'Blue',
+    },
+    {
+      label: 'Asesores de Ventas',
+      value: asesoresVentas.length.toLocaleString('es-PE'),
+      unit: 'ventas',
+      description: 'Equipo comercial activo para gestion y seguimiento de leads.',
+      highlight: `${asesoresVentas.length} comerciales`,
+      progress: usuariosActivos.length ? Math.round((asesoresVentas.length / usuariosActivos.length) * 100) : 0,
+      icon: FiUserCheck,
+      tone: 'Green',
+    },
+    {
+      label: 'Total Leads',
+      value: metricasApi.totalLeads.toLocaleString('es-PE'),
+      unit: 'leads',
+      description: 'Leads registrados en el sistema para medicion general.',
+      highlight: 'Base total',
+      progress: 100,
+      icon: FiActivity,
+      tone: 'Gold',
+    },
+    {
+      label: 'Tasa de Conversion',
+      value: `${tasaConversion}%`,
+      unit: 'ventas',
+      description: `${metricasApi.totalVendidos} ventas sobre ${metricasApi.totalLeads} leads registrados.`,
+      highlight: `${metricasApi.totalVendidos} vendidos`,
+      progress: tasaConversion,
+      icon: FiPieChart,
+      tone: 'Purple',
+    },
+    {
+      label: 'Leads Hoy',
+      value: metricasApi.leadsHoy.toLocaleString('es-PE'),
+      unit: 'hoy',
+      description: 'Nuevos leads captados durante la fecha actual.',
+      highlight: 'Actividad diaria',
+      progress: metricasApi.totalLeads ? Math.min(Math.round((metricasApi.leadsHoy / metricasApi.totalLeads) * 100), 100) : 0,
+      icon: FiTrendingUp,
+      tone: 'Teal',
+    },
+  ];
+
+  const abrirCrear = () => {
+    setAsesorEditar(null);
+    setIsModalOpen(true);
+  };
+
+  const abrirEditar = (asesor) => {
+    setAsesorEditar(asesor);
+    setIsModalOpen(true);
+  };
 
   const openDeleteModal = (asesor) => {
     setAsesorAEliminar(asesor);
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (asesorAEliminar) {
-      setListaAsesores((prevState) =>
+  const handleConfirmDelete = async () => {
+    if (!asesorAEliminar) return;
+    setDeleting(true);
+
+    try {
+      await eliminarAsesorEnApi(asesorAEliminar.id_usuario);
+      setListaUsuarios((prevState) =>
         prevState.filter((asesor) => asesor.id_usuario !== asesorAEliminar.id_usuario),
       );
       setIsDeleteModalOpen(false);
+      setResultado({
+        title: 'Asesor eliminado correctamente',
+        message: 'El asesor paso a estado inactivo mediante eliminado logico.',
+      });
       setAsesorAEliminar(null);
+    } catch (deleteError) {
+      setError(obtenerMensajeError(deleteError, 'No se pudo eliminar el asesor.'));
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleGuardarAsesor = async (nuevoAsesor) => {
-    await crearAsesorEnApi(nuevoAsesor);
-
-    const asesoresActualizados = await obtenerAsesoresDesdeApi();
-    setListaAsesores(asesoresActualizados);
-    setError('');
+  const handleGuardarAsesor = async (asesor) => {
+    const esEdicion = Boolean(asesorEditar?.id_usuario);
+    await guardarAsesorEnApi(asesor, asesorEditar?.id_usuario);
+    await cargarDatos();
+    setAsesorEditar(null);
+    setResultado({
+      title: esEdicion ? 'Asesor actualizado correctamente' : 'Asesor registrado correctamente',
+      message: esEdicion
+        ? 'Los cambios del asesor ya quedaron guardados.'
+        : 'El asesor ya esta disponible en la gestion.',
+    });
   };
-
-  const asesoresActivos = listaAsesores.filter((asesor) => asesor.estado === 1).length;
-  const asesoresInactivos = listaAsesores.length - asesoresActivos;
-  const asesoresConTelefono = listaAsesores.filter((asesor) => asesor.telefono !== 'Sin telefono').length;
-  const asesoresNuevosMes = listaAsesores.filter((asesor) => esDelMesActual(asesor.fecha_creacion)).length;
-  const porcentajeActivos = listaAsesores.length ? Math.round((asesoresActivos / listaAsesores.length) * 100) : 0;
-  const porcentajeContactables = listaAsesores.length ? Math.round((asesoresConTelefono / listaAsesores.length) * 100) : 0;
-  const porcentajeNuevos = listaAsesores.length ? Math.round((asesoresNuevosMes / listaAsesores.length) * 100) : 0;
-
-  const asesoresFiltrados = listaAsesores.filter((asesor) => {
-    const termino = busqueda.trim().toLowerCase();
-
-    if (!termino) return true;
-
-    return [asesor.nombre, asesor.email, asesor.telefono]
-      .some((valor) => valor.toLowerCase().includes(termino));
-  });
-
-  const metricas = [
-    {
-      label: 'Total Asesores',
-      value: listaAsesores.length.toLocaleString('es-PE'),
-      unit: 'equipo',
-      description: `${asesoresActivos} asesores se encuentran activos en este momento.`,
-      highlight: `${porcentajeActivos}% operativos`,
-      progress: porcentajeActivos,
-      icon: FiUsers,
-      tone: 'Orange',
-    },
-    {
-      label: 'Asesores Activos',
-      value: asesoresActivos.toLocaleString('es-PE'),
-      unit: 'activos',
-      description: `${asesoresInactivos} asesores figuran como inactivos en el sistema.`,
-      highlight: `${asesoresInactivos} inactivos`,
-      progress: porcentajeActivos,
-      icon: FiActivity,
-      tone: 'Green',
-    },
-    {
-      label: 'Con Telefono',
-      value: asesoresConTelefono.toLocaleString('es-PE'),
-      unit: 'contactables',
-      description: `El ${porcentajeContactables}% del equipo tiene un telefono registrado.`,
-      highlight: `${porcentajeContactables}% cobertura`,
-      progress: porcentajeContactables,
-      icon: FiPhoneCall,
-      tone: 'Blue',
-    },
-    {
-      label: 'Nuevos del Mes',
-      value: asesoresNuevosMes.toLocaleString('es-PE'),
-      unit: 'registros',
-      description: 'Ingresos recientes al equipo comercial durante el mes actual.',
-      highlight: `${porcentajeNuevos}% del equipo`,
-      progress: porcentajeNuevos,
-      icon: FiTrendingUp,
-      tone: 'Gold',
-    },
-  ];
 
   return (
     <div className={styles.wrapper}>
@@ -422,7 +502,9 @@ const GestionAsesores = () => {
         <div className={styles2.headerSection}>
           <div>
             <h1 className={styles2.title}>Gestion de Asesores</h1>
-            <p className={styles2.subtitle}>Administra el equipo, revisa su estado y monitorea la informacion operativa.</p>
+            <p className={styles2.subtitle}>
+              Administra el equipo, revisa indicadores clave y mantiene actualizada la fuerza comercial.
+            </p>
           </div>
         </div>
 
@@ -459,7 +541,7 @@ const GestionAsesores = () => {
                     <div
                       className={styles2.metricProgressFill}
                       style={{ width: `${metrica.progress}%` }}
-                    ></div>
+                    />
                   </div>
                   <span className={styles2.metricProgressValue}>{metrica.progress}%</span>
                 </div>
@@ -469,7 +551,9 @@ const GestionAsesores = () => {
         </div>
 
         <div className={styles2.filterBar}>
-          <button className={styles2.btnAgregar} onClick={() => setIsModalOpen(true)}>+ Agregar Asesor</button>
+          <button type="button" className={styles2.btnAgregar} onClick={abrirCrear}>
+            + Agregar Asesor
+          </button>
           <div className={styles2.searchContainer}>
             <FiSearch size={18} color="#7b7b7b" />
             <input
@@ -489,6 +573,7 @@ const GestionAsesores = () => {
                 <th>ASESOR</th>
                 <th>CONTACTO</th>
                 <th>TELEFONO</th>
+                <th>ROL</th>
                 <th>ESTADO</th>
                 <th>FECHA REG.</th>
                 <th>ACCIONES</th>
@@ -497,19 +582,19 @@ const GestionAsesores = () => {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan="6" className={styles2.tableMessage}>Cargando asesores...</td>
+                  <td colSpan="7" className={styles2.tableMessage}>Cargando asesores...</td>
                 </tr>
               )}
 
               {!loading && error && (
                 <tr>
-                  <td colSpan="6" className={styles2.tableMessage}>{error}</td>
+                  <td colSpan="7" className={styles2.tableMessage}>{error}</td>
                 </tr>
               )}
 
               {!loading && !error && asesoresFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan="6" className={styles2.tableMessage}>No se encontraron asesores con esa busqueda.</td>
+                  <td colSpan="7" className={styles2.tableMessage}>No se encontraron asesores con esa busqueda.</td>
                 </tr>
               )}
 
@@ -536,15 +621,31 @@ const GestionAsesores = () => {
                     {asesor.telefono}
                   </td>
                   <td>
-                    <span className={asesor.estado === 1 ? styles2.statusActive : styles2.statusInactive}>
-                      {formatearEstado(asesor.estado)}
-                    </span>
+                    <span className={styles2.badge}>Asesor de Ventas</span>
+                  </td>
+                  <td>
+                    <span className={styles2.statusActive}>Activo</span>
                   </td>
                   <td className={styles2.textGray}>{asesor.fechaTexto}</td>
                   <td>
-                    <button className={styles2.btnDelete} onClick={() => openDeleteModal(asesor)}>
-                      <FiTrash2 size={15} />
-                    </button>
+                    <div className={styles2.actionGroup}>
+                      <button
+                        type="button"
+                        className={styles2.btnIcon}
+                        onClick={() => abrirEditar(asesor)}
+                        title="Editar asesor"
+                      >
+                        <FiEdit2 size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles2.btnDelete}
+                        onClick={() => openDeleteModal(asesor)}
+                        title="Eliminar asesor"
+                      >
+                        <FiTrash2 size={15} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -553,17 +654,29 @@ const GestionAsesores = () => {
         </div>
       </main>
 
-      <ModalAgregarAsesor
+      <ModalAsesor
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setAsesorEditar(null);
+        }}
         onSave={handleGuardarAsesor}
+        asesorEditar={asesorEditar}
       />
 
       <ModalConfirmarEliminar
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        nombreAsesor={asesorAEliminar?.nombre}
+        asesor={asesorAEliminar}
+        loading={deleting}
+      />
+
+      <ModalResultado
+        isOpen={Boolean(resultado)}
+        onClose={() => setResultado(null)}
+        title={resultado?.title}
+        message={resultado?.message}
       />
     </div>
   );

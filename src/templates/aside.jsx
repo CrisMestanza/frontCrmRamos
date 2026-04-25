@@ -1,5 +1,5 @@
 import React, { useState } from 'react'; 
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from "./aside.module.css";
 import { MdGroup, MdBadge, MdGroups, MdHub, MdLogout } from "react-icons/md"; 
 
@@ -10,6 +10,7 @@ const Aside = ({ sidebarOpen, setSidebarOpen }) => {
   const rol = sessionStorage.getItem("rol");
   const nombre = sessionStorage.getItem("nombre");
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     if (!confirmando) {
@@ -22,7 +23,7 @@ const Aside = ({ sidebarOpen, setSidebarOpen }) => {
       localStorage.clear();
       
       // REDIRECCIÓN FORZADA: Usa replace para que no pueda volver atrás con el navegador
-      window.location.replace("/"); 
+      navigate("/", { replace: true });
     }
   };
 
@@ -65,6 +66,7 @@ const Aside = ({ sidebarOpen, setSidebarOpen }) => {
               <Link
                 key={item.label}
                 to={item.url}
+                onClick={() => setSidebarOpen(false)}
                 className={`${styles.navItem} ${isActive ? styles.navItemActive : styles.navItemInactive}`}
               >
                 <span className={styles.iconWrapper}>{item.icon}</span>

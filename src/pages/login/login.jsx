@@ -1,6 +1,6 @@
 import styles from './login.module.css';
 import { MdRocketLaunch, MdTrendingUp, MdPersonAdd } from "react-icons/md";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiAlertCircle, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,9 +10,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const enviarDatos = async (e) => {
     // Evita que la página se recargue al presionar Enter o el botón
     if (e) e.preventDefault();
+
+    setErrorMessage("");
+    setLoading(true);
 
     try {
       const response = await axios.post(
@@ -22,18 +27,23 @@ const Login = () => {
           password: password
         }
       );
+      const rol = response.data.rol?.toUpperCase();
+
       sessionStorage.setItem("nombre", response.data.nombre);
-      sessionStorage.setItem("rol", response.data.rol);
+      sessionStorage.setItem("rol", rol);
       sessionStorage.setItem("id_usuario", response.data.id_usuario);
 
-      if (response.data.rol === "ADMIN") {
+      if (rol === "ADMIN") {
         navigate("/inicio");
-      } else if (response.data.rol === "ASESOR") {
+      } else if (rol === "ASESOR") {
         navigate("/asesores");
       }
 
     } catch (error) {
-      console.log(error);
+      const mensaje = error?.response?.data?.error || "No se pudo iniciar sesion. Intentalo nuevamente.";
+      setErrorMessage(mensaje);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,6 +90,8 @@ const Login = () => {
                   placeholder="name@company.com"
                   value={email}
                   onChange={actualzarEmail}
+                  disabled={loading}
+                  required
                 />
               </div>
             </div>
@@ -97,6 +109,8 @@ const Login = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={actualzarPassword}
+                  disabled={loading}
+                  required
                 />
                 <button
                   className={styles.visibilityBtn}
@@ -110,8 +124,16 @@ const Login = () => {
             </div>
 
             {/* Se cambia a type="submit" para que el formulario reconozca la acción */}
-            <button className={styles.submitBtn} type="submit">
-              Ingresar al espacio de trabajo
+            {errorMessage && (
+              <div className={styles.errorAlert}>
+                <FiAlertCircle size={18} />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <button className={styles.submitBtn} type="submit" disabled={loading}>
+              <FiLogIn size={18} />
+              {loading ? "Validando acceso..." : "Ingresar al espacio de trabajo"}
             </button>
           </form>
 

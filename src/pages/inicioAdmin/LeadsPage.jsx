@@ -14,6 +14,7 @@ import {
   MdGroups,
   MdBarChart,
   MdHub,
+  MdTrendingUp,
   MdPersonAdd
 } from "react-icons/md";
 
@@ -268,12 +269,18 @@ const LeadsPage = () => {
 
         {/* Metrics */}
         <div className={styles.metricsGrid}>
-          <div className={styles.metricCard}>
+          <div className={`${styles.metricCard} ${styles.metricToneOrange}`}>
             <div className={styles.metricTop}>
-              <p className={styles.metricLabel}>Total Leads</p>
-              <span className={styles.metricBadge}>Global</span>
+              <div>
+                <p className={styles.metricLabel}>Total Leads</p>
+                <span className={styles.metricBadge}>Global</span>
+              </div>
+              <div className={styles.metricIconBox}>
+                <MdGroup size="1.25em" />
+              </div>
             </div>
             <p className={styles.metricValue}>{totalLeads}</p>
+            <p className={styles.metricDescription}>Prospectos activos para gestion comercial.</p>
             <div className={styles.progressTrack}>
               <div
                 className={styles.progressFill}
@@ -282,16 +289,22 @@ const LeadsPage = () => {
             </div>
           </div>
           {/* Tarjeta 2: Tasa de Conversión Dinámica */}
-          <div className={styles.metricCard}>
+          <div className={`${styles.metricCard} ${styles.metricToneBlue}`}>
             <div className={styles.metricTop}>
-              <p className={styles.metricLabel}>Tasa de Conversión</p>
-              <span className={styles.metricBadge}>Eficiencia</span>
+              <div>
+                <p className={styles.metricLabel}>Tasa de Conversion</p>
+                <span className={styles.metricBadge}>Eficiencia</span>
+              </div>
+              <div className={styles.metricIconBox}>
+                <MdBarChart size="1.25em" />
+              </div>
             </div>
             <p className={styles.metricValue}>
               {totalLeadsGenerales > 0
                 ? ((totalVendidos / totalLeadsGenerales) * 100).toFixed(1)
                 : "0"}%
             </p>
+            <p className={styles.metricDescription}>Ventas cerradas frente a la base total.</p>
             <div className={styles.progressTrack}>
               <div
                 className={styles.progressFill}
@@ -303,12 +316,18 @@ const LeadsPage = () => {
           </div>
 
           {/* Tarjeta 3: Leads Hoy (Estática o podrías crear otro estado) */}
-          <div className={styles.metricCard}>
+          <div className={`${styles.metricCard} ${styles.metricToneGreen}`}>
             <div className={styles.metricTop}>
-              <p className={styles.metricLabel}>Leads Hoy</p>
-              <span className={styles.metricBadge}>Nuevo</span>
+              <div>
+                <p className={styles.metricLabel}>Leads Hoy</p>
+                <span className={styles.metricBadge}>Nuevo</span>
+              </div>
+              <div className={styles.metricIconBox}>
+                <MdTrendingUp size="1.25em" />
+              </div>
             </div>
             <p className={styles.metricValue}>{totalLeadsHoy}</p>
+            <p className={styles.metricDescription}>Ingresos nuevos captados durante el dia.</p>
             <div className={styles.progressTrack}>
               <div
                 className={styles.progressFill}
