@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdChevronLeft, MdEmail, MdPhone, MdBadge, MdPerson, MdTrendingUp, MdHistory } from "react-icons/md";
+import { MdChevronLeft, MdEmail, MdPhone, MdBadge, MdPerson, MdTrendingUp, MdHistory, MdEvent } from "react-icons/md";
 import axios from 'axios';
 import Aside from '../../templates/aside';
 import styles from './asesoresParteAdmin.module.css';
@@ -112,6 +112,15 @@ const DetalleAsesor = () => {
           <span>Descargar Excel</span>
         </button>
 
+        <button
+          className={styles.btnPrimary}
+          onClick={() => navigate(`/admin/asesor-llamadas/${id}`)}
+          style={{ marginLeft: '0.75rem' }}
+        >
+          <MdEvent size="1.2rem" />
+          <span>Historial de llamadas</span>
+        </button>
+
         {/* SISTEMA DE TABS (ESTADOS) */}
         <div className={styles.tabs}>
           {estadosMenu.map((est) => (
@@ -141,6 +150,7 @@ const DetalleAsesor = () => {
                   <th className={styles.th}>Fecha Registro</th>
                   <th className={styles.th}>Historial de estados</th>
                   <th className={styles.th}>Historial de iteraciones</th>
+                  <th className={styles.th}>Llamadas programadas</th>
                 </tr>
               </thead>
               <tbody>
@@ -198,11 +208,22 @@ const DetalleAsesor = () => {
                           <span className={styles.btnText}>Rendimiento</span>
                         </button>
                       </td>
+
+                      <td className={styles.td}>
+                        <button
+                          className={styles.actionBtn}
+                          onClick={() => navigate(`/admin/asesor-llamadas/${lead.id_asesor?.id_usuario || id}/${lead.id_lead}`)}
+                          title="Ver llamadas programadas"
+                        >
+                          <MdEvent size="1.2rem" />
+                          <span className={styles.btnText}>Llamadas</span>
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                    <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
                       No hay leads en este estado.
                     </td>
                   </tr>

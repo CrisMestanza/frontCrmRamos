@@ -77,6 +77,7 @@ const normalizarUsuarios = (data) =>
     nombre: usuario.nombre || 'Sin nombre',
     email: usuario.email || 'Sin correo',
     telefono: usuario.telefono || 'Sin telefono',
+    password: usuario.password || usuario.contrasena || usuario.contraseña || 'No disponible',
     rol: normalizarRol(usuario.rol),
     estado: Number(usuario.estado ?? 1),
     fecha_creacion: usuario.fecha_creacion,
@@ -375,7 +376,7 @@ const GestionAsesores = () => {
     if (!termino) return base;
 
     return base.filter((asesor) =>
-      [asesor.nombre, asesor.email, asesor.telefono, asesor.rol]
+      [asesor.nombre, asesor.email, asesor.telefono, asesor.password, asesor.rol]
         .some((valor) => valor.toLowerCase().includes(termino)),
     );
   }, [busqueda, listaUsuarios]);
@@ -573,6 +574,7 @@ const GestionAsesores = () => {
                 <th>ASESOR</th>
                 <th>CONTACTO</th>
                 <th>TELEFONO</th>
+                <th>CONTRASENA</th>
                 <th>ROL</th>
                 <th>ESTADO</th>
                 <th>FECHA REG.</th>
@@ -582,19 +584,19 @@ const GestionAsesores = () => {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan="7" className={styles2.tableMessage}>Cargando asesores...</td>
+                  <td colSpan="8" className={styles2.tableMessage}>Cargando asesores...</td>
                 </tr>
               )}
 
               {!loading && error && (
                 <tr>
-                  <td colSpan="7" className={styles2.tableMessage}>{error}</td>
+                  <td colSpan="8" className={styles2.tableMessage}>{error}</td>
                 </tr>
               )}
 
               {!loading && !error && asesoresFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan="7" className={styles2.tableMessage}>No se encontraron asesores con esa busqueda.</td>
+                  <td colSpan="8" className={styles2.tableMessage}>No se encontraron asesores con esa busqueda.</td>
                 </tr>
               )}
 
@@ -619,6 +621,9 @@ const GestionAsesores = () => {
                   </td>
                   <td className={asesor.telefono === 'Sin telefono' ? styles2.textGray : ''}>
                     {asesor.telefono}
+                  </td>
+                  <td className={asesor.password === 'No disponible' ? styles2.textGray : ''}>
+                    <span className={styles2.passwordCell}>{asesor.password}</span>
                   </td>
                   <td>
                     <span className={styles2.badge}>Asesor de Ventas</span>

@@ -7,6 +7,7 @@ import ParteAsesorAdmin from "./pages/asesoresParteAdmin/asesoresParteAdmin";
 import DetalleAsesor from "./pages/asesoresParteAdmin/detalleAsesor";
 import HistorialLead from "./pages/asesoresParteAdmin/historialLeadEstado";
 import InteraccionesAsesor from "./pages/asesoresParteAdmin/InteraccionesAsesor";
+import HistorialLlamadasAsesor from "./pages/asesoresParteAdmin/HistorialLlamadasAsesor";
 import VentasPageAdmin from "./pages/ventas/VentasPage";
 import GestionAsesor from "./pages/gestionAsesor/asesorGestion"
 import GestionProyecto from "./pages//proyectos/proyectos"
@@ -25,6 +26,8 @@ function App() {
         <Route path="/asesoresadmin/detalle/:id" element={<DetalleAsesor />} />
         <Route path="/admin/lead-historial/:idLead" element={<HistorialLead />} />
         <Route path="/admin/asesor-interacciones/:idAsesor/:idLead" element={<InteraccionesAsesor />} />
+        <Route path="/admin/asesor-llamadas/:idAsesor" element={<HistorialLlamadasAsesor />} />
+        <Route path="/admin/asesor-llamadas/:idAsesor/:idLead" element={<HistorialLlamadasAsesor />} />
         <Route path="/asesores/ventas" element={<VentasPageAsesor />} />
         <Route path="/proyectos" element={< GestionProyecto/>} />
 
