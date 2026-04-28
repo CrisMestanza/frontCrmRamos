@@ -747,14 +747,35 @@
   width:32px;
   height:32px;
   border-radius:8px;
+  border:0;
   background:#3b82f6;
   color:white;
+  cursor:pointer;
   transition:0.2s;
 }
 
 .btnCall:hover{
   background:#2563eb;
   transform:scale(1.05);
+}
+
+.actionBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  background:rgba(255,255,255,0.04);
+  color:#e2e8f0;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.actionBtn:hover{
+  background:rgba(59,130,246,0.16);
+  color:#93c5fd;
 }
 
 
@@ -917,6 +938,8 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
 }
 
 .modalContent {
@@ -929,6 +952,7 @@
   /* Borde fino para que resalte sobre el overlay */
   border: 1px solid #333;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 100%;
 }
 
 .modalContent h3 {
@@ -961,6 +985,8 @@
 /* Estilo para los inputs dentro del modal oscuro */
 .modalContent input, 
 .modalContent textarea {
+  width: 100%;
+  box-sizing: border-box;
   background: #2a2a2a;
   border: 1px solid #444;
   border-radius: 8px;
@@ -981,6 +1007,7 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 25px;
+  flex-wrap: wrap;
 }
 
 /* Botón Cancelar */
@@ -1017,4 +1044,371 @@
   background: #064e3b;
   color: #6b7280;
   cursor: not-allowed;
+}
+
+.callsSection {
+  margin: 0 0 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: #161616;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.25);
+}
+
+.callsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.sectionEyebrow {
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 0.25rem;
+}
+
+.sectionTitle {
+  color: #fff;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.callsStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(86px, 1fr));
+  gap: 0.6rem;
+}
+
+.callStat {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: #1f1f1f;
+  padding: 0.75rem;
+  min-width: 0;
+}
+
+.callStat span {
+  display: block;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.callStat p {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  margin: 0.15rem 0 0;
+}
+
+.callStatDanger {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(127, 29, 29, 0.22);
+}
+
+.callsPanelGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 1100px) {
+  .callsPanelGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.callsPanel {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  background: #111;
+  overflow: hidden;
+}
+
+.panelTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+}
+
+.panelTitleRow h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.panelTitleRow svg {
+  color: var(--primary);
+}
+
+.callList {
+  display: flex;
+  flex-direction: column;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.callItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.callItem:first-child {
+  border-top: 0;
+}
+
+.callItemExpired {
+  background: rgba(127, 29, 29, 0.12);
+}
+
+.callItemMain {
+  display: flex;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.callIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(236, 91, 19, 0.14);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.callLeadName {
+  margin: 0;
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.callMeta {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.callError {
+  margin: 0.35rem 0 0;
+  color: #fca5a5;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.callActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.callStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.13);
+  color: #93c5fd;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.callStatusSoon {
+  background: rgba(236, 91, 19, 0.18);
+  color: #fdba74;
+}
+
+.callStatusExpired {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.cancelIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.cancelIconBtn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fff;
+}
+
+.emptyCalls {
+  padding: 1rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.modalTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.modalTopRow h3 {
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 0.35rem;
+}
+
+.modalCloseBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.reminderModal {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.reminderList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.reminderItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: #151515;
+}
+
+.reminderBody {
+  min-width: 0;
+}
+
+.btnCallWide {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.btnCallWide:hover {
+  background: #1d4ed8;
+}
+
+.cancelSummary {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btnDanger {
+  background: #991b1b;
+  color: #fff;
+  border: 0;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btnDanger:hover {
+  background: #b91c1c;
+}
+
+.btnDanger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .main {
+    padding: 1rem;
+  }
+
+  .callsHeader {
+    flex-direction: column;
+  }
+
+  .callsStats {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .callItem {
+    flex-direction: column;
+  }
+
+  .callActions {
+    justify-content: flex-start;
+  }
+
+  .modalContent {
+    width: min(94vw, 450px);
+    padding: 1.25rem;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .modalActions button {
+    width: 100%;
+  }
+
+  .reminderItem {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .btnCallWide {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
 }

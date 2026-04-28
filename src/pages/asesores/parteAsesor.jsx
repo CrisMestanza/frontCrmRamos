@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './parteAsesor.module.css';
 import Aside from '../../templates/aside';
 import axios from "axios";
@@ -13,7 +14,13 @@ import {
   MdHub,
   MdPhone,
   MdChat,
-  MdPersonAdd
+  MdPersonAdd,
+  MdEvent,
+  MdHistory,
+  MdTrendingUp,
+  MdAlarm,
+  MdCancel,
+  MdClose
 } from "react-icons/md";
 import ModalLead from './modalAgregarLead';
 
@@ -25,12 +32,24 @@ const metrics = [
   { label: 'Leads Hoy', value: '+42', badge: '+15%', progress: 90 },
 ];
 
+const LEADS_REFRESH_MS = 30000;
+const CALL_REMINDERS_REFRESH_MS = 15000;
+
 const ParteAsesor = () => {
+  const navigate = useNavigate();
   // Nuevo estado para controlar el modal de duración de llamada
   const [showCallModal, setShowCallModal] = useState(false);
   const [callLeadId, setCallLeadId] = useState(null);
   const [callDurationMinutos, setCallDurationMinutos] = useState("");
   const [callDuration, setCallDuration] = useState("");
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleLead, setScheduleLead] = useState(null);
+  const [scheduleDateTime, setScheduleDateTime] = useState("");
+  const [scheduleSaving, setScheduleSaving] = useState(false);
+  const [reminderAvisos, setReminderAvisos] = useState([]);
+  const [cancelLead, setCancelLead] = useState(null);
+  const [cancelSaving, setCancelSaving] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   // Modal agregar lead
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -44,20 +63,57 @@ const ParteAsesor = () => {
 
   const [dataLeads, setDataLeads] = useState([]);
 
+  const obtenerLeads = async () => {
+    const idUsuario = sessionStorage.getItem("id_usuario");
+    try {
+      const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
+
+      setDataLeads(response.data);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const obtenerLeads = async () => {
+    obtenerLeads();
+    const intervalId = window.setInterval(obtenerLeads, LEADS_REFRESH_MS);
+
+    const refrescarAlVolver = () => obtenerLeads();
+    window.addEventListener("focus", refrescarAlVolver);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refrescarAlVolver);
+    };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNow(new Date()), 60000);
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const revisarRecordatorios = async () => {
       const idUsuario = sessionStorage.getItem("id_usuario");
+      if (!idUsuario) return;
+
       try {
-        const response = await axios.get(`https://api.ramosgrupo.lat/api/getleads/${idUsuario}/`);
+        const response = await axios.get(`https://api.ramosgrupo.lat/api/recordatoriosllamadas/${idUsuario}/`);
+        const avisos = response.data?.avisos || [];
 
-        setDataLeads(response.data);
-
+        if (avisos.length > 0) {
+          setReminderAvisos(avisos);
+          obtenerLeads();
+        }
       } catch (error) {
-        console.log(error);
+        console.error("Error al revisar recordatorios:", error);
       }
     };
 
-    obtenerLeads();
+    revisarRecordatorios();
+    const intervalId = window.setInterval(revisarRecordatorios, CALL_REMINDERS_REFRESH_MS);
+    return () => window.clearInterval(intervalId);
   }, []);
 
   // Para obtener total leads hoy de un asesor
@@ -334,7 +390,122 @@ const ParteAsesor = () => {
     alert("No se pudo guardar el registro.");
   }
 }
+  const formatearFechaLlamada = (fecha) => {
+    if (!fecha) return "Sin llamada programada";
+    return new Date(fecha).toLocaleString('es-PE', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
+  const convertirADatetimeLocal = (fecha) => {
+    if (!fecha) return "";
+    const date = new Date(fecha);
+    const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return offsetDate.toISOString().slice(0, 16);
+  };
+
+  const abrirProgramarLlamada = (lead) => {
+    setScheduleLead(lead);
+    setScheduleDateTime(convertirADatetimeLocal(lead.fecha_llamada));
+    setShowScheduleModal(true);
+  };
+
+  const getCallStatus = (fecha) => {
+    if (!fecha) return "sin_llamada";
+    const fechaLlamada = new Date(fecha);
+    return fechaLlamada.getTime() < now.getTime() ? "vencida" : "pendiente";
+  };
+
+  const getCallStatusLabel = (fecha) => {
+    const estado = getCallStatus(fecha);
+    if (estado === "vencida") return "Hora vencida";
+    return "Pendiente";
+  };
+
+  const getMinutesToCall = (fecha) => {
+    if (!fecha) return null;
+    return Math.ceil((new Date(fecha).getTime() - now.getTime()) / 60000);
+  };
+
+  const llamadasAgendadas = useMemo(() => {
+    return dataLeads
+      .filter((lead) => Boolean(lead.fecha_llamada))
+      .sort((a, b) => new Date(a.fecha_llamada) - new Date(b.fecha_llamada));
+  }, [dataLeads]);
+
+  const llamadasPendientes = useMemo(() => {
+    return llamadasAgendadas.filter((lead) => new Date(lead.fecha_llamada).getTime() >= now.getTime());
+  }, [llamadasAgendadas, now]);
+
+  const llamadasVencidas = useMemo(() => {
+    return llamadasAgendadas.filter((lead) => new Date(lead.fecha_llamada).getTime() < now.getTime());
+  }, [llamadasAgendadas, now]);
+
+  const getAsesorNombre = (lead) => lead?.id_asesor?.nombre || sessionStorage.getItem("nombre") || "Asesor";
+
+  const cancelarProgramacionLlamada = async () => {
+    if (!cancelLead) return;
+
+    setCancelSaving(true);
+    try {
+      const response = await axios.patch(
+        `https://api.ramosgrupo.lat/api/programarllamada/${cancelLead.id_lead}/`,
+        { fecha_llamada: null }
+      );
+      const leadActualizado = response.data?.lead || response.data;
+      setDataLeads(prev =>
+        prev.map(lead =>
+          lead.id_lead === cancelLead.id_lead
+            ? { ...lead, ...leadActualizado, fecha_llamada: null, recordatorio_proximo_enviado: 0 }
+            : lead
+        )
+      );
+      setCancelLead(null);
+      obtenerLeads();
+    } catch (error) {
+      console.error("Error al cancelar llamada:", error);
+      alert("No se pudo cancelar la llamada.");
+    } finally {
+      setCancelSaving(false);
+    }
+  };
+
+  const guardarProgramacionLlamada = async () => {
+    if (!scheduleLead) return;
+
+    setScheduleSaving(true);
+    try {
+      const fechaIso = scheduleDateTime ? new Date(scheduleDateTime).toISOString() : null;
+      const response = await axios.patch(
+        `https://api.ramosgrupo.lat/api/programarllamada/${scheduleLead.id_lead}/`,
+        { fecha_llamada: fechaIso }
+      );
+
+      const leadActualizado = response.data?.lead || response.data;
+      setDataLeads(prev =>
+        prev.map(lead =>
+          lead.id_lead === scheduleLead.id_lead
+            ? { ...lead, ...leadActualizado }
+            : lead
+        )
+      );
+      setShowScheduleModal(false);
+      setScheduleLead(null);
+      setScheduleDateTime("");
+      obtenerLeads();
+      const minutosAntes = response.data?.aviso_whatsapp_minutos_antes || 5;
+      alert(`Llamada programada. El WhatsApp al asesor se enviara ${minutosAntes} minutos antes.`);
+    } catch (error) {
+      console.error("Error al programar llamada:", error);
+      alert("No se pudo programar la llamada.");
+    } finally {
+      setScheduleSaving(false);
+    }
+  };
 
   const [activeTab, setActiveTab] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -444,6 +615,115 @@ const ParteAsesor = () => {
           <span>Agregar Lead</span>
         </button>
 
+        <section className={styles.callsSection}>
+          <div className={styles.callsHeader}>
+            <div>
+              <p className={styles.sectionEyebrow}>Agenda de llamadas</p>
+              <h3 className={styles.sectionTitle}>Seguimiento telefonico</h3>
+            </div>
+            <div className={styles.callsStats}>
+              <div className={styles.callStat}>
+                <span>{llamadasAgendadas.length}</span>
+                <p>Agendadas</p>
+              </div>
+              <div className={styles.callStat}>
+                <span>{llamadasPendientes.length}</span>
+                <p>Pendientes</p>
+              </div>
+              <div className={`${styles.callStat} ${llamadasVencidas.length > 0 ? styles.callStatDanger : ""}`}>
+                <span>{llamadasVencidas.length}</span>
+                <p>Vencidas</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.callsPanelGrid}>
+            <div className={styles.callsPanel}>
+              <div className={styles.panelTitleRow}>
+                <MdAlarm />
+                <h4>Llamadas pendientes</h4>
+              </div>
+              <div className={styles.callList}>
+                {llamadasPendientes.length === 0 ? (
+                  <div className={styles.emptyCalls}>No hay llamadas pendientes.</div>
+                ) : (
+                  llamadasPendientes.map((lead) => {
+                    const minutos = getMinutesToCall(lead.fecha_llamada);
+                    return (
+                      <div key={`pendiente-${lead.id_lead}`} className={styles.callItem}>
+                        <div className={styles.callItemMain}>
+                          <div className={styles.callIcon}><MdPhone /></div>
+                          <div>
+                            <p className={styles.callLeadName}>{lead.nombre}</p>
+                            <p className={styles.callMeta}>
+                              {formatearFechaLlamada(lead.fecha_llamada)} - {getAsesorNombre(lead)}
+                            </p>
+                            <p className={styles.callMeta}>Cliente: {lead.telefono || "Sin telefono"}</p>
+                          </div>
+                        </div>
+                        <div className={styles.callActions}>
+                          <span className={`${styles.callStatus} ${minutos <= 5 ? styles.callStatusSoon : ""}`}>
+                            {minutos <= 0 ? "Ahora" : `Faltan ${minutos} min`}
+                          </span>
+                          <a className={styles.actionBtn} href={`tel:${lead.telefono}`} title="Llamar">
+                            <MdPhone size="1.1rem" />
+                          </a>
+                          <button className={styles.actionBtn} type="button" title="Reprogramar" onClick={() => abrirProgramarLlamada(lead)}>
+                            <MdEvent size="1.1rem" />
+                          </button>
+                          <button className={styles.cancelIconBtn} type="button" title="Cancelar llamada" onClick={() => setCancelLead(lead)}>
+                            <MdCancel size="1.1rem" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div className={styles.callsPanel}>
+              <div className={styles.panelTitleRow}>
+                <MdHistory />
+                <h4>Agendadas y vencidas</h4>
+              </div>
+              <div className={styles.callList}>
+                {llamadasAgendadas.length === 0 ? (
+                  <div className={styles.emptyCalls}>Todavia no hay llamadas agendadas.</div>
+                ) : (
+                  llamadasAgendadas.map((lead) => {
+                    const estado = getCallStatus(lead.fecha_llamada);
+                    return (
+                      <div key={`agendada-${lead.id_lead}`} className={`${styles.callItem} ${estado === "vencida" ? styles.callItemExpired : ""}`}>
+                        <div className={styles.callItemMain}>
+                          <div className={styles.callIcon}><MdEvent /></div>
+                          <div>
+                            <p className={styles.callLeadName}>{lead.nombre}</p>
+                            <p className={styles.callMeta}>
+                              {formatearFechaLlamada(lead.fecha_llamada)} - {getAsesorNombre(lead)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.callActions}>
+                          <span className={`${styles.callStatus} ${estado === "vencida" ? styles.callStatusExpired : ""}`}>
+                            {getCallStatusLabel(lead.fecha_llamada)}
+                          </span>
+                          <button className={styles.actionBtn} type="button" title="Reprogramar" onClick={() => abrirProgramarLlamada(lead)}>
+                            <MdEvent size="1.1rem" />
+                          </button>
+                          <button className={styles.cancelIconBtn} type="button" title="Cancelar llamada" onClick={() => setCancelLead(lead)}>
+                            <MdCancel size="1.1rem" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Tabs */}
         <div className={styles.tabs}>
           {tabs.map((tab, i) => (
@@ -470,6 +750,9 @@ const ParteAsesor = () => {
                   <th className={styles.th}>Observaciones </th>
                   <th className={styles.th}>Sub-estado </th>
                   <th className={styles.th}>Acciones</th>
+                  <th className={styles.th}>Proxima llamada</th>
+                  <th className={styles.th}>Historial</th>
+                  <th className={styles.th}>Rendimiento</th>
                   <th className={styles.th}>Fecha asignada</th>
 
                 </tr>
@@ -582,7 +865,7 @@ const ParteAsesor = () => {
 
                           {/* WhatsApp */}
                           <a
-                            href={`https://wa.me/51${lead.telefono}`}
+                            href={`https://wa.me/${lead.telefono}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.btnWhatsapp}
@@ -601,7 +884,42 @@ const ParteAsesor = () => {
                             <MdPhone size={18} />
                           </a>
 
+                          <button
+                            type="button"
+                            className={styles.btnCall}
+                            title="Programar llamada"
+                            onClick={() => abrirProgramarLlamada(lead)}
+                          >
+                            <MdEvent size={18} />
+                          </button>
+
                         </div>
+                      </td>
+
+                      <td className={`${styles.td} ${styles.tdMuted}`}>
+                        {formatearFechaLlamada(lead.fecha_llamada)}
+                      </td>
+
+                      <td className={styles.td}>
+                        <button
+                          type="button"
+                          className={styles.actionBtn}
+                          onClick={() => navigate(`/admin/lead-historial/${lead.id_lead}`)}
+                          title="Ver historial de estados"
+                        >
+                          <MdHistory size="1.2rem" />
+                        </button>
+                      </td>
+
+                      <td className={styles.td}>
+                        <button
+                          type="button"
+                          className={styles.actionBtn}
+                          onClick={() => navigate(`/admin/asesor-interacciones/${lead.id_asesor?.id_usuario}/${lead.id_lead}`)}
+                          title="Ver rendimiento del lead"
+                        >
+                          <MdTrendingUp size="1.2rem" />
+                        </button>
                       </td>
 
                       {/* Fecha formateada */}
@@ -736,6 +1054,147 @@ const ParteAsesor = () => {
                 disabled={!callDuration && !callDurationMinutos}
               >
                 Guardar Registro
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reminderAvisos.length > 0 && (
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.modalContent} ${styles.reminderModal}`}>
+            <div className={styles.modalTopRow}>
+              <div>
+                <h3>Llamadas por atender</h3>
+                <p>Estas llamadas estan dentro de la ventana de aviso.</p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalCloseBtn}
+                onClick={() => setReminderAvisos([])}
+                title="Cerrar"
+              >
+                <MdClose size={20} />
+              </button>
+            </div>
+
+            <div className={styles.reminderList}>
+              {reminderAvisos.map((aviso) => {
+                const leadAviso = dataLeads.find((lead) => lead.id_lead === aviso.id_lead);
+                return (
+                  <div key={aviso.id_lead} className={styles.reminderItem}>
+                    <div className={styles.callIcon}><MdAlarm /></div>
+                    <div className={styles.reminderBody}>
+                      <p className={styles.callLeadName}>{aviso.nombre}</p>
+                      <p className={styles.callMeta}>{formatearFechaLlamada(aviso.fecha_llamada)}</p>
+                      {leadAviso?.telefono && <p className={styles.callMeta}>Cliente: {leadAviso.telefono}</p>}
+                      {!aviso.aviso_whatsapp_enviado && aviso.aviso_whatsapp_error && (
+                        <p className={styles.callError}>WhatsApp no enviado: {aviso.aviso_whatsapp_error}</p>
+                      )}
+                    </div>
+                    {leadAviso?.telefono && (
+                      <a className={styles.btnCallWide} href={`tel:${leadAviso.telefono}`}>
+                        <MdPhone />
+                        Llamar
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={styles.btnPrimary} type="button" onClick={() => setReminderAvisos([])}>
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelLead && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalTopRow}>
+              <div>
+                <h3>Cancelar llamada</h3>
+                <p>La llamada saldra de pendientes y ya no se enviara el recordatorio.</p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalCloseBtn}
+                onClick={() => setCancelLead(null)}
+                title="Cerrar"
+                disabled={cancelSaving}
+              >
+                <MdClose size={20} />
+              </button>
+            </div>
+
+            <div className={styles.cancelSummary}>
+              <p className={styles.callLeadName}>{cancelLead.nombre}</p>
+              <p className={styles.callMeta}>{formatearFechaLlamada(cancelLead.fecha_llamada)}</p>
+              <p className={styles.callMeta}>Asesor: {getAsesorNombre(cancelLead)}</p>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setCancelLead(null)}
+                disabled={cancelSaving}
+              >
+                Volver
+              </button>
+              <button
+                className={styles.btnDanger}
+                onClick={cancelarProgramacionLlamada}
+                disabled={cancelSaving}
+              >
+                {cancelSaving ? "Cancelando..." : "Cancelar llamada"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showScheduleModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Programar llamada</h3>
+            <p>{scheduleLead?.nombre}</p>
+
+            <div className={styles.formGroup}>
+              <label>Dia y hora de contacto</label>
+              <input
+                type="datetime-local"
+                className={styles.inputTable}
+                value={scheduleDateTime}
+                onChange={(e) => setScheduleDateTime(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setShowScheduleModal(false)}
+                disabled={scheduleSaving}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setScheduleDateTime("")}
+                disabled={scheduleSaving}
+              >
+                Limpiar
+              </button>
+              <button
+                className={styles.btnPrimary}
+                onClick={guardarProgramacionLlamada}
+                disabled={scheduleSaving}
+              >
+                {scheduleSaving ? "Guardando..." : "Guardar"}
               </button>
             </div>
           </div>
