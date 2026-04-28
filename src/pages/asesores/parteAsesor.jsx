@@ -194,8 +194,8 @@ const ParteAsesor = () => {
     obtenerEstados();
   }, []);
 
-  // Obtener sub-estados
-  const [dataSubEstados, setDataSubEstados] = useState([]);
+  // Obtener sub-estados por estado
+  const [subEstadosPorEstado, setSubEstadosPorEstado] = useState({});
   // Estados para el modal de venta
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
   const [idLeadSeleccionado, setIdLeadSeleccionado] = useState(null);
@@ -206,6 +206,7 @@ const ParteAsesor = () => {
 
 
   const clickEstado = async (id_estado, id_lead) => {
+    if (!id_estado) return;
     const nuevoEstadoId = Number(id_estado);
     if (nuevoEstadoId === 4) {
       setIdLeadSeleccionado(id_lead); // Guardamos qué lead se está vendiendo
@@ -234,22 +235,44 @@ const ParteAsesor = () => {
               id_estado: {
                 id_estado: Number(id_estado),
                 nombre: estadoSeleccionado?.nombre
-              }
+              },
+              id_subestado: null
             }
             : lead
         )
       );
 
-      const response = await axios.get(
-        `https://api.ramosgrupo.lat/api/getsubestados/${id_estado}/`
-      );
-
-      setDataSubEstados(response.data);
+      cargarSubEstadosPorEstado(id_estado);
 
     } catch (error) {
       console.log(error);
     }
   };
+
+  const cargarSubEstadosPorEstado = async (id_estado) => {
+    if (!id_estado || subEstadosPorEstado[id_estado]) return subEstadosPorEstado[id_estado] || [];
+
+    try {
+      const response = await axios.get(
+        `https://api.ramosgrupo.lat/api/getsubestados/${id_estado}/`
+      );
+      setSubEstadosPorEstado(prev => ({
+        ...prev,
+        [id_estado]: response.data
+      }));
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const estadosEnLeads = [...new Set(dataLeads.map((lead) => lead.id_estado?.id_estado).filter(Boolean))];
+    estadosEnLeads.forEach((idEstado) => {
+      cargarSubEstadosPorEstado(idEstado);
+    });
+  }, [dataLeads]);
 
   // Estado de venta
   const confirmarVenta = async () => {
@@ -287,8 +310,11 @@ const ParteAsesor = () => {
   }
 
   const clickSubEstado = async (id_subestado, id_lead) => {
+    if (!id_subestado) return;
     const leadActual = dataLeads.find(l => l.id_lead === id_lead);
     const comentarioAEnviar = leadActual?.comentario_temporal || "";
+    const estadoId = leadActual?.id_estado?.id_estado;
+    const subEstadosDelEstado = subEstadosPorEstado[estadoId] || await cargarSubEstadosPorEstado(estadoId);
     try {
 
       await axios.patch(
@@ -299,7 +325,7 @@ const ParteAsesor = () => {
         }
       );
 
-      const subestadoSeleccionado = dataSubEstados.find(
+      const subestadoSeleccionado = subEstadosDelEstado.find(
         (s) => s.id_subestado === Number(id_subestado)
       );
 
@@ -766,6 +792,8 @@ const ParteAsesor = () => {
                     : fuenteNombre.includes("Google")
                       ? styles.sourceRed
                       : styles.sourceGray;
+                  const estadoIdLead = lead.id_estado?.id_estado;
+                  const subEstadosLead = subEstadosPorEstado[estadoIdLead] || [];
 
                   return (
                     <tr key={lead.id_lead} className={styles.tableRow}>
@@ -810,7 +838,7 @@ const ParteAsesor = () => {
                             value={lead.id_estado?.id_estado || ""}
                             onChange={(e) => clickEstado(e.target.value, lead.id_lead)}
                           >
-                            <option value="">Seleccione</option>
+                            <option value="">Elegir estado</option>
                             {dataEstados.map((estado) => (
                               <option key={estado.id_estado} value={estado.id_estado}>
                                 {estado.nombre}
@@ -844,10 +872,13 @@ const ParteAsesor = () => {
                           <select
                             className={styles.selectTable}
                             value={lead.id_subestado?.id_subestado || ""}
+                            onFocus={() => cargarSubEstadosPorEstado(estadoIdLead)}
+                            onMouseDown={() => cargarSubEstadosPorEstado(estadoIdLead)}
                             onChange={(e) => clickSubEstado(e.target.value, lead.id_lead)}
+                            disabled={!estadoIdLead}
                           >
-                            <option value="">Seleccione</option>
-                            {dataSubEstados.map((sub) => (
+                            <option value="">Elegir una opcion</option>
+                            {subEstadosLead.map((sub) => (
                               <option key={sub.id_subestado} value={sub.id_subestado}>
                                 {sub.nombre}
                               </option>
